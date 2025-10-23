@@ -1,0 +1,20 @@
+FROM python:3.11-alpine
+
+WORKDIR /app
+
+COPY . .
+
+RUN apk add --no-cache \
+    && python -m http.server 3000 --directory /app &
+
+RUN echo 'import http.server' > server.py \
+    && echo 'import socketserver' >> server.py \
+    && echo 'PORT = 3000' >> server.py \
+    && echo 'Handler = http.server.SimpleHTTPRequestHandler' >> server.py \
+    && echo 'with socketserver.TCPServer(("", PORT), Handler) as httpd:' >> server.py \
+    && echo '    print(f"Frontend server running at http://localhost:{PORT}")' >> server.py \
+    && echo '    httpd.serve_forever()' >> server.py
+
+EXPOSE 3000
+
+CMD ["python", "server.py"]

@@ -1,0 +1,14 @@
+import enum
+
+class RoomStatus(str, enum.Enum):
+    AVAILABLE = "available"
+    OCCUPIED = "occupied" 
+    MAINTENANCE = "maintenance"
+    CLEANING = "cleaning"
+
+class BookingStatus(str, enum.Enum):
+    CONFIRMED = "confirmed"
+    CANCELLED = "cancelled"
+    COMPLETED = "completed"
+    CHECKED_IN = "checked_in"
+    CHECKED_OUT = "checked_out"
