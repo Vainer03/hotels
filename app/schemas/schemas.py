@@ -110,7 +110,7 @@ class UserRead(UserBase):
 class BookingBase(BaseModel):
     user_id: int
     hotel_id: int
-    room_id: int
+    room_id: Optional[int] = None
     check_in_date: datetime
     check_out_date: datetime
     number_of_guests: int

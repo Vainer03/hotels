@@ -19,7 +19,6 @@ async def init_mock_data():
         from app.models.hotels import Hotel, Room, User, Booking
         from app.database import Base
         from datetime import datetime, timedelta
-        import random
         
         Base.metadata.create_all(bind=engine)
         
@@ -67,22 +66,27 @@ async def init_mock_data():
             db.flush()
             
             rooms = []
-            for hotel in hotels:
+            room_types = ["Standard", "Deluxe", "Suite"]
+            room_prices = [2500, 4000, 6000]  
+            
+            for hotel_index, hotel in enumerate(hotels):
                 for i in range(5): 
+                    room_type = room_types[i % 3]  
                     room = Room(
                         hotel_id=hotel.id,
                         room_number=f"10{i+1}",
-                        floor=1,
-                        room_type=random.choice(["Standard", "Deluxe", "Suite"]),
-                        description=f"Комфортабельный номер в отеле {hotel.name}",
-                        price_per_night=random.randint(2000, 6000),
-                        capacity=random.randint(1, 4),
+                        floor=1 + (i // 3),  
+                        room_type=room_type,
+                        description=f"{room_type} номер в отеле {hotel.name}",
+                        price_per_night=room_prices[i % 3],
+                        capacity=2 if room_type == "Standard" else (3 if room_type == "Deluxe" else 4),
                         amenities="WiFi, TV, Кондиционер",
                         status="available"
                     )
                     db.add(room)
                     rooms.append(room)
-            
+            db.flush()
+
             users_data = [
                 {"email": "ivan.petrov@example.com", "first_name": "Иван", "last_name": "Петров", "phone": "+79991234567"},
                 {"email": "maria.ivanova@example.com", "first_name": "Мария", "last_name": "Иванова", "phone": "+79992345678"},
@@ -97,38 +101,77 @@ async def init_mock_data():
 
             db.flush()
 
-            booking_statuses = ["confirmed", "confirmed", "confirmed", "completed", "checked_in"]
             
-            # Создаем несколько бронирований
-            for i in range(3):  # 15 тестовых бронирований
-                user = random.choice(users)
-                room = random.choice(rooms)
+            bookings_data = [
+                {
+                    "user_id": users[0].id,
+                    "room_id": rooms[0].id, 
+                    "hotel_id": hotels[0].id,
+                    "check_in_date": datetime.now() + timedelta(days=7),
+                    "check_out_date": datetime.now() + timedelta(days=10),
+                    "number_of_guests": 2,
+                    "total_price": 7500, 
+                    "status": "confirmed",
+                    "special_requests": "Прошу номер на высоком этаже"
+                },
+                {
+                    "user_id": users[0].id,
+                    "room_id": rooms[3].id, 
+                    "hotel_id": hotels[0].id,
+                    "check_in_date": datetime.now() + timedelta(days=30),
+                    "check_out_date": datetime.now() + timedelta(days=35),
+                    "number_of_guests": 3,
+                    "total_price": 30000, 
+                    "status": "confirmed",
+                    "special_requests": "Отмечаем годовщину свадьбы"
+                },
                 
-                # Генерируем случайные даты
-                days_from_now = random.randint(1, 60)
-                check_in_date = datetime.now() + timedelta(days=days_from_now)
-                check_out_date = check_in_date + timedelta(days=random.randint(1, 7))
+                {
+                    "user_id": users[1].id,
+                    "room_id": rooms[5].id, 
+                    "hotel_id": hotels[1].id,
+                    "check_in_date": datetime.now() + timedelta(days=3),
+                    "check_out_date": datetime.now() + timedelta(days=5),
+                    "number_of_guests": 1,
+                    "total_price": 5000,  
+                    "status": "checked_in",
+                    "special_requests": "Требуется трансфер из аэропорта"
+                },
+                {
+                    "user_id": users[1].id,
+                    "room_id": rooms[8].id,  
+                    "hotel_id": hotels[1].id,
+                    "check_in_date": datetime.now() - timedelta(days=10),
+                    "check_out_date": datetime.now() - timedelta(days=5),
+                    "number_of_guests": 2,
+                    "total_price": 12000,  
+                    "status": "completed",
+                    "special_requests": None
+                },
                 
-                nights = (check_out_date - check_in_date).days
-                total_price = nights * room.price_per_night
                 
-                booking = Booking(
-                    user_id=user.id,
-                    hotel_id=room.hotel_id,
-                    room_id=room.id,
-                    check_in_date=check_in_date,
-                    check_out_date=check_out_date,
-                    number_of_guests=random.randint(1, room.capacity),
-                    total_price=total_price,
-                    status=random.choice(booking_statuses),
-                    special_requests=random.choice([None, "Прошу детскую кроватку", "Хочу номер с видом на море", "Поздний заезд"])
-                )
+                {
+                    "user_id": users[2].id,
+                    "room_id": rooms[10].id,  
+                    "hotel_id": hotels[2].id,
+                    "check_in_date": datetime.now() + timedelta(days=14),
+                    "check_out_date": datetime.now() + timedelta(days=21),
+                    "number_of_guests": 2,
+                    "total_price": 17500,  
+                    "status": "confirmed",
+                    "special_requests": "Хочу номер с видом на море"
+                }
+            ]
+            
+            for booking_data in bookings_data:
+                booking = Booking(**booking_data)
                 db.add(booking)
                 
-                # Обновляем статус комнаты если бронирование активно
                 if booking.status in ["confirmed", "checked_in"]:
-                    room.status = "occupied"
-            db.flush()
+                    room = next((r for r in rooms if r.id == booking.room_id), None)
+                    if room:
+                        room.status = "occupied"
+            
             db.commit()
             
             return {"message": "Моковые данные успешно созданы! Перезагрузите страницу."}
@@ -141,6 +184,7 @@ async def init_mock_data():
             
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Ошибка при создании моковых данных: {str(e)}")
+    
 
 @router.post("/send-booking-confirmation", response_model=schemas.TaskResponse)
 async def send_booking_confirmation_task(

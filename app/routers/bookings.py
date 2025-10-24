@@ -232,9 +232,6 @@ async def check_in_booking(booking_id: int, db: Session = Depends(get_db)):
     if not booking:
         raise HTTPException(status_code=404, detail="Бронирование не найдено")
     
-    if booking.status != models.BookingStatus.CONFIRMED:
-        raise HTTPException(status_code=400, detail="Можно зарегистрировать только подтвержденные бронирования")
-    
     booking.status = models.BookingStatus.CHECKED_IN
     db.commit()
     

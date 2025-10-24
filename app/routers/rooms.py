@@ -272,29 +272,60 @@ async def update_room_status(
     
     return {"message": f"Статус комнаты обновлен на {status}"}
 
+
 @router.delete("/{room_id}", response_model=schemas.MessageResponse)
-async def delete_room(room_id: int, db: Session = Depends(get_db)):
-    """Удалить комнату"""
-    room = db.query(models.Room).filter(models.Room.id == room_id).first()
-    if not room:
-        raise HTTPException(status_code=404, detail="Комната не найдена")
-    
-    active_bookings = db.query(models.Booking).filter(
-        models.Booking.room_id == room_id,
-        models.Booking.status.in_([models.BookingStatus.CONFIRMED, models.BookingStatus.CHECKED_IN])
-    ).count()
-    
-    if active_bookings > 0:
-        raise HTTPException(
-            status_code=400,
-            detail="Нельзя удалить комнату с активными бронированиями"
-        )
-    
-    hotel_id = room.hotel_id
-    db.delete(room)
-    db.commit()
-    
-    cache_service = CacheService()
-    await cache_service.invalidate_hotel_cache(hotel_id)
-    
-    return {"message": "Комната успешно удалена"}
+def delete_room(room_id: int, db: Session = Depends(get_db)):
+    """Удалить комнату с обработкой активных бронирований"""
+    try:
+        db_room = db.query(models.Room).filter(models.Room.id == room_id).first()
+        if not db_room:
+            raise HTTPException(status_code=404, detail="Комната не найдена")
+        
+        room_number = db_room.room_number
+        hotel_id = db_room.hotel_id
+        
+        all_bookings = db.query(models.Booking).filter(
+            models.Booking.room_id == room_id
+        ).all()
+        
+        current_time = datetime.now()
+        active_bookings = []
+        
+        for booking in all_bookings:
+            if booking.status in ["confirmed", "checked_in"]:
+                booking.status = "cancelled"
+                booking.cancellation_reason = f"Комната #{room_number} удалена из системы"
+                booking.cancelled_at = current_time
+                active_bookings.append(booking)
+                print(f"Cancelled booking {booking.id}")
+        
+        print(f"Cancelled {len(active_bookings)} active bookings for room {room_id}")
+        
+        db.delete(db_room)
+        db.commit()
+        
+        try:
+            cache_service = CacheService()
+            cache_service.invalidate_room_cache(room_id)
+            cache_service.invalidate_hotel_cache(hotel_id)
+            cache_service.invalidate_pattern("rooms_search:*")
+            cache_service.invalidate_pattern(f"hotel_rooms:{hotel_id}:*")
+        except Exception as cache_error:
+            print(f"Cache error: {cache_error}")
+        
+        return {
+            "message": f"Комната {room_number} успешно удалена",
+            "details": {
+                "room_id": room_id,
+                "cancelled_active_bookings": len(active_bookings),
+                "preserved_completed_bookings": len(all_bookings) - len(active_bookings),
+                "cancelled_booking_ids": [b.id for b in active_bookings]
+            }
+        }
+        
+    except Exception as e:
+        db.rollback()
+        print(f"Error deleting room {room_id}: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Ошибка при удалении комнаты: {str(e)}")

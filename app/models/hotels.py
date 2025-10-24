@@ -19,8 +19,19 @@ class Hotel(Base):
     rating = Column(Float, default=0.0)
     created_at = Column(DateTime, default=datetime.utcnow)
     
-    rooms = relationship("Room", back_populates="hotel", cascade="all, delete-orphan")
-    bookings = relationship("Booking", back_populates="hotel")
+    rooms = relationship(
+        "Room", 
+        back_populates="hotel", 
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+        )
+    
+    bookings = relationship(
+        "Booking", 
+        back_populates="hotel",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+        )
 
 class Room(Base):
     __tablename__ = "rooms"
@@ -38,7 +49,10 @@ class Room(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     
     hotel = relationship("Hotel", back_populates="rooms")
-    bookings = relationship("Booking", back_populates="room")
+    bookings = relationship(
+        "Booking", 
+        back_populates="room",
+        )
 
 class User(Base):
     __tablename__ = "users"
@@ -50,16 +64,19 @@ class User(Base):
     phone = Column(String(20), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     
-    bookings = relationship("Booking", back_populates="user")
+    bookings = relationship(
+        "Booking", 
+        back_populates="user",
+        )
 
 class Booking(Base):
     __tablename__ = "bookings"
     
     id = Column(Integer, primary_key=True, index=True)
     booking_reference = Column(String(36), unique=True, default=lambda: str(uuid.uuid4()))
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    hotel_id = Column(Integer, ForeignKey("hotels.id"), nullable=False)
-    room_id = Column(Integer, ForeignKey("rooms.id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"))
+    hotel_id = Column(Integer, ForeignKey("hotels.id"))
+    room_id = Column(Integer, ForeignKey("rooms.id"))
     check_in_date = Column(DateTime, nullable=False)
     check_out_date = Column(DateTime, nullable=False)
     number_of_guests = Column(Integer, nullable=False)

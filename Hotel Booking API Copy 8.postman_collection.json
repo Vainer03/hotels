@@ -1003,19 +1003,13 @@
 									}
 								],
 								"url": {
-									"raw": "{{baseUrl}}/hotels/:{{hotel_id}}",
+									"raw": "{{baseUrl}}/hotels/{{hotel_id_1}}",
 									"host": [
 										"{{baseUrl}}"
 									],
 									"path": [
 										"hotels",
-										":{{hotel_id}}"
-									],
-									"variable": [
-										{
-											"key": "{{hotel_id}}",
-											"value": "1"
-										}
+										"{{hotel_id_1}}"
 									]
 								},
 								"description": "Получить подробную информацию об отеле по его идентификатору"
@@ -1124,13 +1118,13 @@
 									}
 								},
 								"url": {
-									"raw": "{{baseUrl}}/hotels/{{hotel_id}}",
+									"raw": "{{baseUrl}}/hotels/{{hotel_id_1}}",
 									"host": [
 										"{{baseUrl}}"
 									],
 									"path": [
 										"hotels",
-										"{{hotel_id}}"
+										"{{hotel_id_1}}"
 									]
 								},
 								"description": "Обновить информацию об отеле"
@@ -1253,13 +1247,13 @@
 									}
 								],
 								"url": {
-									"raw": "{{baseUrl}}/hotels/{{hotel_id}}",
+									"raw": "{{baseUrl}}/hotels/{{hotel_id_3}}",
 									"host": [
 										"{{baseUrl}}"
 									],
 									"path": [
 										"hotels",
-										"{{hotel_id}}"
+										"{{hotel_id_3}}"
 									]
 								},
 								"description": "Удалить отель из системы"
@@ -1732,7 +1726,7 @@
 									}
 								],
 								"url": {
-									"raw": "{{baseUrl}}/rooms/available?hotel_id={{hotel_id}}&check_in_date=2025-12-12&check_out_date=2025-12-13&min_price=9896.486378999802&max_price=9896.486378999802",
+									"raw": "{{baseUrl}}/rooms/available?hotel_id={{hotel_id_2}}&check_in_date=2025-12-12&check_out_date=2025-12-13&min_price=9896.486378999802&max_price=9896.486378999802",
 									"host": [
 										"{{baseUrl}}"
 									],
@@ -1743,7 +1737,7 @@
 									"query": [
 										{
 											"key": "hotel_id",
-											"value": "{{hotel_id}}"
+											"value": "{{hotel_id_2}}"
 										},
 										{
 											"key": "check_in_date",
@@ -1952,7 +1946,7 @@
 											}
 										],
 										"url": {
-											"raw": "{{baseUrl}}/rooms/search/available?city=string&country=string&room_type=string&check_in=2025-12-12T14:00:00Z&check_out=2025-12-15T12:00:00Z&guests={{user_id}}&min_price=9896.486378999802&max_price=9896.486378999802",
+											"raw": "{{baseUrl}}/rooms/search/available?city=string&country=string&room_type=string&check_in=2025-12-12T14:00:00Z&check_out=2025-12-15T12:00:00Z&guests={{user_id_1}}&min_price=9896.486378999802&max_price=9896.486378999802",
 											"host": [
 												"{{baseUrl}}"
 											],
@@ -1984,7 +1978,7 @@
 												},
 												{
 													"key": "guests",
-													"value": "{{user_id}}"
+													"value": "{{user_id_1}}"
 												},
 												{
 													"key": "min_price",
@@ -2158,13 +2152,13 @@
 											}
 										],
 										"url": {
-											"raw": "{{baseUrl}}/rooms/{{room_id}}/status?status=maintenance",
+											"raw": "{{baseUrl}}/rooms/{{room_id_6}}/status?status=maintenance",
 											"host": [
 												"{{baseUrl}}"
 											],
 											"path": [
 												"rooms",
-												"{{room_id}}",
+												"{{room_id_6}}",
 												"status"
 											],
 											"query": [
@@ -2327,13 +2321,13 @@
 									}
 								],
 								"url": {
-									"raw": "{{baseUrl}}/rooms/{{room_id}}",
+									"raw": "{{baseUrl}}/rooms/{{room_id_6}}",
 									"host": [
 										"{{baseUrl}}"
 									],
 									"path": [
 										"rooms",
-										"{{room_id}}"
+										"{{room_id_6}}"
 									]
 								},
 								"description": "Получить подробную информацию о комнате"
@@ -2442,13 +2436,13 @@
 									}
 								},
 								"url": {
-									"raw": "{{baseUrl}}/rooms/{{room_id}}",
+									"raw": "{{baseUrl}}/rooms/{{room_id_6}}",
 									"host": [
 										"{{baseUrl}}"
 									],
 									"path": [
 										"rooms",
-										"{{room_id}}"
+										"{{room_id_6}}"
 									]
 								},
 								"description": "Обновить информацию о комнате"
@@ -2623,13 +2617,13 @@
 									}
 								],
 								"url": {
-									"raw": "{{baseUrl}}/rooms/{{room_id}}",
+									"raw": "{{baseUrl}}/rooms/{{room_id_6}}",
 									"host": [
 										"{{baseUrl}}"
 									],
 									"path": [
 										"rooms",
-										"{{room_id}}"
+										"{{room_id_6}}"
 									]
 								},
 								"description": "Удалить комнату из системы"
@@ -2764,7 +2758,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/rooms?skip=0&limit=100&hotel_id={{hotel_id}}",
+							"raw": "{{baseUrl}}/rooms?skip=0&limit=100&hotel_id={{hotel_id_2}}",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -2782,7 +2776,7 @@
 								},
 								{
 									"key": "hotel_id",
-									"value": "{{hotel_id}}"
+									"value": "{{hotel_id_2}}"
 								}
 							]
 						},
@@ -2853,7 +2847,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"room_number\": \"string\",\n  \"floor\": 9989,\n  \"room_type\": \"string\",\n  \"price_per_night\": 8846.761172614339,\n  \"capacity\": 7935,\n  \"status\": \"occupied\",\n  \"hotel_id\": 1802,\n  \"description\": \"string\",\n  \"amenities\": \"string\"\n}",
+							"raw": "{\n  \"room_number\": \"string2\",\n  \"floor\": 9000,\n  \"room_type\": \"string\",\n  \"price_per_night\": 8846.761172614339,\n  \"capacity\": 7935,\n  \"status\": \"occupied\",\n  \"hotel_id\": 2,\n  \"description\": \"string\",\n  \"amenities\": \"string\"\n}",
 							"options": {
 								"raw": {
 									"headerFamily": "json",
@@ -3035,13 +3029,13 @@
 											}
 										],
 										"url": {
-											"raw": "{{baseUrl}}/bookings/{{booking_id}}/cancel",
+											"raw": "{{baseUrl}}/bookings/{{booking_id_1}}/cancel",
 											"host": [
 												"{{baseUrl}}"
 											],
 											"path": [
 												"bookings",
-												"{{booking_id}}",
+												"{{booking_id_1}}",
 												"cancel"
 											]
 										},
@@ -3183,13 +3177,13 @@
 											}
 										],
 										"url": {
-											"raw": "{{baseUrl}}/bookings/{{booking_id}}/check-in",
+											"raw": "{{baseUrl}}/bookings/{{booking_id_2}}/check-in",
 											"host": [
 												"{{baseUrl}}"
 											],
 											"path": [
 												"bookings",
-												"{{booking_id}}",
+												"{{booking_id_2}}",
 												"check-in"
 											]
 										},
@@ -3331,20 +3325,14 @@
 											}
 										],
 										"url": {
-											"raw": "{{baseUrl}}/bookings/:booking_id/check-out",
+											"raw": "{{baseUrl}}/bookings/{{booking_id_2}}/check-out",
 											"host": [
 												"{{baseUrl}}"
 											],
 											"path": [
 												"bookings",
-												":booking_id",
+												"{{booking_id_2}}",
 												"check-out"
-											],
-											"variable": [
-												{
-													"key": "booking_id",
-													"value": "2077"
-												}
 											]
 										},
 										"description": "Зарегистрировать выезд гостя по бронированию"
@@ -3482,13 +3470,13 @@
 									}
 								],
 								"url": {
-									"raw": "{{baseUrl}}/bookings/{{booking_id}}",
+									"raw": "{{baseUrl}}/bookings/{{booking_id_1}}",
 									"host": [
 										"{{baseUrl}}"
 									],
 									"path": [
 										"bookings",
-										"{{booking_id}}"
+										"{{booking_id_1}}"
 									]
 								},
 								"description": "Получить подробную информацию о бронировании"
@@ -3597,13 +3585,13 @@
 									}
 								},
 								"url": {
-									"raw": "{{baseUrl}}/bookings/{{booking_id}}",
+									"raw": "{{baseUrl}}/bookings/{{booking_id_5}}",
 									"host": [
 										"{{baseUrl}}"
 									],
 									"path": [
 										"bookings",
-										"{{booking_id}}"
+										"{{booking_id_5}}"
 									]
 								},
 								"description": "Обновить информацию о бронировании"
@@ -3789,14 +3777,14 @@
 													}
 												],
 												"url": {
-													"raw": "{{baseUrl}}/bookings/user/{{user_id}}/bookings",
+													"raw": "{{baseUrl}}/bookings/user/{{user_id_2}}/bookings",
 													"host": [
 														"{{baseUrl}}"
 													],
 													"path": [
 														"bookings",
 														"user",
-														"{{user_id}}",
+														"{{user_id_2}}",
 														"bookings"
 													]
 												},
@@ -3983,7 +3971,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"user_id\": 3517,\n  \"hotel_id\": 2048,\n  \"room_id\": 9590,\n  \"check_in_date\": \"1990-10-03T15:00:31.282Z\",\n  \"check_out_date\": \"1989-05-24T03:49:01.205Z\",\n  \"number_of_guests\": 4703,\n  \"special_requests\": \"string\"\n}",
+							"raw": "{\n  \"user_id\": 2,\n  \"hotel_id\": 2,\n  \"room_id\": 8,\n  \"check_in_date\": \"1990-10-03T15:00:31.282Z\",\n  \"check_out_date\": \"1991-05-24T03:49:01.205Z\",\n  \"number_of_guests\": 1,\n  \"special_requests\": \"string\"\n}",
 							"options": {
 								"raw": {
 									"headerFamily": "json",
@@ -4162,13 +4150,13 @@
 									}
 								],
 								"url": {
-									"raw": "{{baseUrl}}/users/{{user_id}}",
+									"raw": "{{baseUrl}}/users/{{user_id_1}}",
 									"host": [
 										"{{baseUrl}}"
 									],
 									"path": [
 										"users",
-										"{{user_id}}"
+										"{{user_id_1}}"
 									]
 								},
 								"description": "Получить информацию о пользователе"
@@ -4277,13 +4265,13 @@
 									}
 								},
 								"url": {
-									"raw": "{{baseUrl}}/users/{{user_id}}",
+									"raw": "{{baseUrl}}/users/{{user_id_1}}",
 									"host": [
 										"{{baseUrl}}"
 									],
 									"path": [
 										"users",
-										"{{user_id}}"
+										"{{user_id_1}}"
 									]
 								},
 								"description": "Обновить информацию о пользователе"
@@ -4458,13 +4446,13 @@
 									}
 								],
 								"url": {
-									"raw": "{{baseUrl}}/users/{{user_id}}",
+									"raw": "{{baseUrl}}/users/{{user_id_1}}",
 									"host": [
 										"{{baseUrl}}"
 									],
 									"path": [
 										"users",
-										"{{user_id}}"
+										"{{user_id_1}}"
 									]
 								},
 								"description": "Удалить пользователя из системы"

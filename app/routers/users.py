@@ -79,17 +79,6 @@ async def delete_user(user_id: int, db: Session = Depends(get_db)):
     if not user:
         raise HTTPException(status_code=404, detail="Пользователь не найден")
     
-    active_bookings = db.query(models.Booking).filter(
-        models.Booking.user_id == user_id,
-        models.Booking.status.in_([models.BookingStatus.CONFIRMED, models.BookingStatus.CHECKED_IN])
-    ).count()
-    
-    if active_bookings > 0:
-        raise HTTPException(
-            status_code=400,
-            detail="Нельзя удалить пользователя с активными бронированиями"
-        )
-    
     db.delete(user)
     db.commit()
     

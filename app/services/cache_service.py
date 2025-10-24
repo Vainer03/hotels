@@ -2,6 +2,8 @@ import logging
 from typing import Optional, List, Dict, Any
 from app.core.redis import get_redis_manager
 from app.core.redis import RedisManager
+import json
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -123,3 +125,16 @@ class CacheService:
             "popular_rooms": list(popular_rooms)[:10],
             "popular_hotels": list(popular_hotels)[:10]
         }
+    
+class JSONEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, datetime):
+            return obj.isoformat()
+        return super().default(obj)
+
+def set_cache(self, key, value, expire=3600):
+    try:
+        serialized_value = json.dumps(value, cls=JSONEncoder)
+        self.redis_client.setex(key, expire, serialized_value)
+    except Exception as e:
+        print(f"Cache set error: {e}")
