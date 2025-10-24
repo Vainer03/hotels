@@ -256,7 +256,7 @@ async def update_room_status(
     db: Session = Depends(get_db)
 ):
     """Обновить статус комнаты"""
-    room = db.query(schemas.Room).filter(schemas.Room.id == room_id).first()
+    room = db.query(models.Room).filter(models.Room.id == room_id).first()
     if not room:
         raise HTTPException(status_code=404, detail="Комната не найдена")
     

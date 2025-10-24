@@ -1,0 +1,548 @@
+openapi: 3.0.3
+info:
+  title: Hotel Booking API
+  description: |
+    # Порядок работы с API
+
+    1. **Сначала инициализируйте тестовые данные** через POST /tasks/init-mock-data
+    2. **Получите реальные ID** через GET /hotels/, GET /users/, etc.
+    3. **Используйте полученные ID** для CRUD операций
+
+    Полнофункциональное API для бронирования отелей с RabbitMQ, Redis и Celery
+  version: 2.2.0
+  contact:
+    name: API Support
+    email: support@hotelbooking.com
+
+servers:
+  - url: http://localhost:80/api/v1
+    description: Development server
+
+tags:
+  - name: tasks
+    description: Фоновые задачи и утилиты (начните здесь!)
+  - name: hotels
+    description: Операции с отелями
+  - name: rooms
+    description: Операции с комнатами
+  - name: users
+    description: Операции с пользователями
+  - name: bookings
+    description: Операции с бронированиями
+  - name: general
+    description: Общие эндпоинты
+
+paths:
+  /:
+    get:
+      summary: Корневой эндпоинт API
+      description: Проверка работоспособности API с префиксом /api/v1
+      tags: [general]
+      responses:
+        '200':
+          description: API работает корректно
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Hotel Booking API is running!"
+                  version:
+                    type: string
+                    example: "2.2.0"
+                  status:
+                    type: string
+                    example: "healthy"
+                  docs:
+                    type: string
+                    example: "/api/v1/docs"
+                  health:
+                    type: string
+                    example: "/api/v1/health"
+
+  /health:
+    get:
+      summary: Проверка состояния сервисов
+      description: Проверка статуса всех подключенных сервисов (база данных, Redis, RabbitMQ)
+      tags: [general]
+      responses:
+        '200':
+          description: Статус сервисов
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum: [healthy, degraded, unhealthy]
+                  services:
+                    type: object
+                    properties:
+                      api:
+                        type: string
+                      database:
+                        type: string
+                      rabbitmq:
+                        type: string
+                      redis:
+                        type: string
+                  timestamp:
+                    type: string
+                    format: date-time
+
+  /tasks/init-mock-data:
+    post:
+      summary: 🚀 Инициализировать тестовые данные (НАЧНИТЕ ЗДЕСЬ!)
+      description: |
+        **Обязательный первый шаг!** Создает тестовые данные для разработки - 3 отеля, комнаты, пользователей.
+        
+        После выполнения этого запроса используйте полученные реальные ID для тестирования остальных эндпоинтов.
+      tags: [tasks]
+      responses:
+        '200':
+          description: Тестовые данные успешно созданы
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+          examples:
+            success:
+              summary: Данные созданы
+              value:
+                message: "Моковые данные успешно созданы! Перезагрузите страницу."
+        '500':
+          description: Ошибка при создании тестовых данных
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /hotels/:
+    get:
+      summary: Получить список отелей
+      description: |
+        Получить список отелей с возможностью фильтрации по городу и стране.
+        
+        **Используйте этот эндпоинт для получения реальных ID отелей** после инициализации тестовых данных.
+      tags: [hotels]
+      parameters:
+        - name: skip
+          in: query
+          description: Количество записей для пропуска
+          required: false
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+        - name: limit
+          in: query
+          description: Максимальное количество записей
+          required: false
+          schema:
+            type: integer
+            default: 100
+            minimum: 1
+            maximum: 1000
+        - name: city
+          in: query
+          description: Фильтр по городу
+          required: false
+          schema:
+            type: string
+            example: "Москва"
+        - name: country
+          in: query
+          description: Фильтр по стране
+          required: false
+          schema:
+            type: string
+            example: "Россия"
+      responses:
+        '200':
+          description: Список отелей
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/HotelRead'
+          examples:
+            hotelsList:
+              summary: Список отелей
+              value:
+                - id: 1
+                  name: "Grand Hotel Moscow"
+                  description: "Роскошный отель в центре Москвы"
+                  address: "ул. Тверская, 1"
+                  city: "Москва"
+                  country: "Россия"
+                  rating: 4.8
+                  created_at: "2024-01-01T00:00:00"
+                - id: 2
+                  name: "St. Petersburg Imperial"
+                  description: "Элегантный отель в Санкт-Петербурге"
+                  address: "Невский пр-т, 25"
+                  city: "Санкт-Петербург"
+                  country: "Россия"
+                  rating: 4.6
+                  created_at: "2024-01-01T00:00:00"
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    post:
+      summary: Создать новый отель
+      description: Создать новый отель в системе
+      tags: [hotels]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HotelCreate'
+            examples:
+              newHotel:
+                summary: Пример создания отеля
+                value:
+                  name: "Новый Отель"
+                  description: "Описание нового отеля"
+                  address: "ул. Новая, 123"
+                  city: "Москва"
+                  country: "Россия"
+                  rating: 4.5
+      responses:
+        '200':
+          description: Отель успешно создан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HotelRead'
+        '400':
+          description: Неверные данные
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Ошибка при создании отеля
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /hotels/{hotel_id}:
+    get:
+      summary: Получить отель по ID
+      description: |
+        Получить подробную информацию об отеле по его идентификатору.
+        
+        **Внимание:** Используйте реальные ID отелей, полученные из GET /hotels/
+      tags: [hotels]
+      parameters:
+        - name: hotel_id
+          in: path
+          required: true
+          description: ID отеля (используйте реальные ID 1, 2, 3 и т.д.)
+          schema:
+            type: integer
+            minimum: 1
+            example: 1
+      responses:
+        '200':
+          description: Информация об отеле
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HotelRead'
+          examples:
+            hotelFound:
+              summary: Отель найден
+              value:
+                id: 1
+                name: "Grand Hotel Moscow"
+                description: "Роскошный отель в центре Москвы"
+                address: "ул. Тверская, 1"
+                city: "Москва"
+                country: "Россия"
+                rating: 4.8
+                created_at: "2024-01-01T00:00:00"
+        '404':
+          description: Отель не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            hotelNotFound:
+              summary: Отель не найден
+              value:
+                detail: "Отель не найден"
+
+    put:
+      summary: Обновить информацию об отеле
+      description: Обновить информацию об отеле
+      tags: [hotels]
+      parameters:
+        - name: hotel_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+            example: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HotelUpdate'
+            examples:
+              updateHotel:
+                summary: Пример обновления отеля
+                value:
+                  name: "Обновленное название отеля"
+                  rating: 4.9
+      responses:
+        '200':
+          description: Информация об отеле обновлена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HotelRead'
+        '404':
+          description: Отель не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      summary: Удалить отель
+      description: Удалить отель из системы
+      tags: [hotels]
+      parameters:
+        - name: hotel_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+            example: 1
+      responses:
+        '200':
+          description: Отель успешно удален
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+          examples:
+            hotelDeleted:
+              summary: Отель удален
+              value:
+                message: "Отель успешно удален"
+        '404':
+          description: Отель не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '400':
+          description: Нельзя удалить отель с существующими комнатами
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # ... остальные пути остаются аналогично с акцентом на использование реальных ID
+
+  /users/:
+    get:
+      summary: Получить список пользователей
+      description: |
+        Получить список всех пользователей.
+        
+        **Используйте этот эндпоинт для получения реальных ID пользователей** после инициализации тестовых данных.
+      tags: [users]
+      parameters:
+        - name: skip
+          in: query
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 100
+            minimum: 1
+            maximum: 1000
+      responses:
+        '200':
+          description: Список пользователей
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserRead'
+          examples:
+            usersList:
+              summary: Список пользователей
+              value:
+                - id: 1
+                  email: "ivan.petrov@example.com"
+                  first_name: "Иван"
+                  last_name: "Петров"
+                  phone: "+79991234567"
+                  created_at: "2024-01-01T00:00:00"
+                - id: 2
+                  email: "maria.ivanova@example.com"
+                  first_name: "Мария"
+                  last_name: "Иванова"
+                  phone: "+79992345678"
+                  created_at: "2024-01-01T00:00:00"
+
+  /users/{user_id}:
+    get:
+      summary: Получить пользователя по ID
+      description: |
+        Получить информацию о пользователе.
+        
+        **Внимание:** Используйте реальные ID пользователей, полученные из GET /users/
+      tags: [users]
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+            example: 1
+      responses:
+        '200':
+          description: Информация о пользователе
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserRead'
+        '404':
+          description: Пользователь не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # ... аналогично для rooms и bookings
+
+  /tasks/send-booking-confirmation:
+    post:
+      summary: Отправить подтверждение бронирования
+      description: Запустить фоновую задачу отправки email с подтверждением бронирования
+      tags: [tasks]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmailTaskData'
+            examples:
+              bookingConfirmation:
+                summary: Пример данных для подтверждения бронирования
+                value:
+                  to_email: "user@example.com"
+                  user_name: "Иван Иванов"
+                  booking_data:
+                    booking_reference: "ABC123"
+                    hotel_name: "Grand Hotel"
+                    room_number: "101"
+                    check_in_date: "2024-01-01"
+                    check_out_date: "2024-01-05"
+                    total_price: 15000
+                    number_of_guests: 2
+      responses:
+        '200':
+          description: Задача отправки email поставлена в очередь
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskResponse'
+        '500':
+          description: Ошибка при постановке задачи в очередь
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # ... остальные эндпоинты tasks
+
+components:
+  schemas:
+    MessageResponse:
+      type: object
+      properties:
+        message:
+          type: string
+      required:
+        - message
+      example:
+        message: "Операция выполнена успешно"
+
+    ErrorResponse:
+      type: object
+      properties:
+        detail:
+          type: string
+      required:
+        - detail
+      example:
+        detail: "Ошибка выполнения операции"
+
+    # ... остальные схемы остаются без изменений
+
+  parameters:
+    HotelIdPath:
+      name: hotel_id
+      in: path
+      required: true
+      description: ID отеля (используйте реальные ID из GET /hotels/)
+      schema:
+        type: integer
+        minimum: 1
+        example: 1
+
+    UserIdPath:
+      name: user_id
+      in: path
+      required: true
+      description: ID пользователя (используйте реальные ID из GET /users/)
+      schema:
+        type: integer
+        minimum: 1
+        example: 1
+
+    RoomIdPath:
+      name: room_id
+      in: path
+      required: true
+      description: ID комнаты (используйте реальные ID из GET /rooms/)
+      schema:
+        type: integer
+        minimum: 1
+        example: 1
+
+    BookingIdPath:
+      name: booking_id
+      in: path
+      required: true
+      description: ID бронирования (используйте реальные ID из GET /bookings/)
+      schema:
+        type: integer
+        minimum: 1
+        example: 1

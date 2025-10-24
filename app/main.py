@@ -12,6 +12,7 @@ from app.routers.rooms import router as rooms_router
 from app.routers.users import router as users_router
 from app.routers.bookings import router as bookings_router
 from app.routers.tasks import router as tasks_router
+from app.routers.general import router as general_router
 import os
 import logging
 
@@ -64,8 +65,9 @@ app = FastAPI(
     title="Hotel Booking API",
     description="Полнофункциональное API для бронирования отелей с RabbitMQ, Redis и Celery",
     version="2.2.0",
-    docs_url="/docs",
-    redoc_url="/redoc",
+    docs_url="/api/v1/docs",
+    redoc_url="/api/v1/redoc",
+    openapi_url="/api/v1/openapi.json",
     lifespan=lifespan
 )
 
@@ -77,74 +79,43 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.get("/")
-async def root():
-    return {
-        "message": "Hotel Booking API is running!",
-        "version": "2.2.0",
-        "status": "healthy"
-    }
-
-@app.get("/health")
-async def health_check():
-    services = {
-        "api": "healthy",
-        "database": "unknown",
-        "rabbitmq": "unknown", 
-        "redis": "unknown"
-    }
-    
-    try:
-        from app.database import SessionLocal
-        from sqlalchemy import text
-        db = SessionLocal()
-        db.execute(text("SELECT 1"))
-        db.close()
-        services["database"] = "healthy"
-    except Exception as e:
-        services["database"] = f"unhealthy: {str(e)}"
-    
-    try:
-        if rabbitmq_manager and rabbitmq_manager.connection:
-            services["rabbitmq"] = "healthy"
-        else:
-            services["rabbitmq"] = "unavailable"
-    except Exception as e:
-        services["rabbitmq"] = f"unhealthy: {str(e)}"
-    
-    try:
-        if redis_manager and redis_manager.redis:
-            await redis_manager.redis.ping()
-            services["redis"] = "healthy"
-        else:
-            services["redis"] = "unavailable"
-    except Exception as e:
-        services["redis"] = f"unhealthy: {str(e)}"
-    
-    critical_services = ["api", "database"]
-    degraded_services = ["rabbitmq", "redis"]
-    
-    critical_healthy = all(services[svc] == "healthy" for svc in critical_services)
-    degraded_healthy = all(services[svc] in ["healthy", "unavailable"] for svc in degraded_services)
-    
-    if critical_healthy and degraded_healthy:
-        overall_status = "healthy"
-    elif critical_healthy:
-        overall_status = "degraded"
-    else:
-        overall_status = "unhealthy"
-    
-    return {
-        "status": overall_status,
-        "services": services,
-        "timestamp": "2024-01-01T00:00:00Z"
-    }
-
 app.include_router(hotels_router, prefix="/api/v1")
 app.include_router(rooms_router, prefix="/api/v1")
 app.include_router(users_router, prefix="/api/v1")
 app.include_router(bookings_router, prefix="/api/v1")
 app.include_router(tasks_router, prefix="/api/v1")
+app.include_router(general_router, prefix="/app/v1")
+
+@app.get("/api/v1/")
+async def root():
+    return {
+        "message": "Hotel Booking API is running!",
+        "version": "2.2.0",
+        "status": "healthy",
+        "docs": "/api/v1/docs",
+        "health": "/api/v1/health"
+    }
+
+@app.get("/api/v1/health")
+async def health_check():
+    return {"status": "healthy"}
+
+@app.get("/")
+async def root_no_prefix():
+    return {
+        "message": "Hotel Booking API is running! Access API at /api/v1/",
+        "version": "2.2.0",
+        "status": "healthy",
+        "docs": "/api/v1/docs"
+    }
+
+if __name__ == "__main__":
+    uvicorn.run(
+        "main:app",
+        host="0.0.0.0", 
+        port=8000,
+        reload=True
+    )
 
 if __name__ == "__main__":
     print("=" * 50)
@@ -159,6 +130,6 @@ if __name__ == "__main__":
     uvicorn.run(
         "app.main:app",
         host="0.0.0.0",
-        port=8000,
+        port=80,
         reload=False  
     )

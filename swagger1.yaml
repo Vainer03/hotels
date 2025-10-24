@@ -1,0 +1,1610 @@
+openapi: 3.0.3
+info:
+  title: Hotel Booking API
+  description: Полнофункциональное API для бронирования отелей с RabbitMQ, Redis и Celery
+  version: 2.2.0
+  contact:
+    name: API Support
+    email: support@hotelbooking.com
+
+servers:
+  - url: http://localhost:80/api/v1
+    description: Development server
+
+tags:
+  - name: general
+    description: Общие эндпоинты
+  - name: tasks
+    description: Фоновые задачи и утилиты
+  - name: hotels
+    description: Операции с отелями
+  - name: rooms
+    description: Операции с комнатами
+  - name: users
+    description: Операции с пользователями
+  - name: bookings
+    description: Операции с бронированиями
+
+
+paths:
+  /:
+    get:
+      summary: Корневой эндпоинт
+      description: Проверка работоспособности API
+      tags: [general]
+      responses:
+        '200':
+          description: API работает корректно
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Hotel Booking API is running!"
+                  version:
+                    type: string
+                    example: "2.2.0"
+                  status:
+                    type: string
+                    example: "healthy"
+
+  /health:
+    get:
+      summary: Проверка состояния сервисов
+      description: Проверка статуса всех подключенных сервисов (база данных, Redis, RabbitMQ)
+      tags: [general]
+      responses:
+        '200':
+          description: Статус сервисов
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum: [healthy, degraded, unhealthy]
+                  services:
+                    type: object
+                    properties:
+                      api:
+                        type: string
+                      database:
+                        type: string
+                      rabbitmq:
+                        type: string
+                      redis:
+                        type: string
+                  timestamp:
+                    type: string
+                    format: date-time
+
+  /tasks/init-mock-data:
+    post:
+      summary: Инициализировать моковые данные
+      description: Создать тестовые данные для разработки (отели, комнаты, пользователи, бронирования)
+      tags: [tasks]
+      responses:
+        '200':
+          description: Моковые данные успешно созданы
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '500':
+          description: Ошибка при создании моковых данных
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /hotels:
+    get:
+      summary: Получить список отелей
+      description: Получить список отелей с возможностью фильтрации по городу и стране
+      tags: [hotels]
+      parameters:
+        - name: skip
+          in: query
+          description: Количество записей для пропуска
+          required: false
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+        - name: limit
+          in: query
+          description: Максимальное количество записей
+          required: false
+          schema:
+            type: integer
+            default: 100
+            minimum: 1
+            maximum: 1000
+        - name: city
+          in: query
+          description: Фильтр по городу
+          required: false
+          schema:
+            type: string
+        - name: country
+          in: query
+          description: Фильтр по стране
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Список отелей
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/HotelRead'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    post:
+      summary: Создать новый отель
+      description: Создать новый отель в системе
+      tags: [hotels]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HotelCreate'
+      responses:
+        '200':
+          description: Отель успешно создан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HotelRead'
+        '400':
+          description: Неверные данные
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Ошибка при создании отеля
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /hotels/{hotel_id}:
+    get:
+      summary: Получить отель по ID
+      description: Получить подробную информацию об отеле по его идентификатору
+      tags: [hotels]
+      parameters:
+        - name: hotel_id
+          in: path
+          required: true
+          description: ID отеля
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        '200':
+          description: Информация об отеле
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HotelRead'
+        '404':
+          description: Отель не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    put:
+      summary: Обновить информацию об отеле
+      description: Обновить информацию об отеле
+      tags: [hotels]
+      parameters:
+        - name: hotel_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HotelUpdate'
+      responses:
+        '200':
+          description: Информация об отеле обновлена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HotelRead'
+        '404':
+          description: Отель не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      summary: Удалить отель
+      description: Удалить отель из системы
+      tags: [hotels]
+      parameters:
+        - name: hotel_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        '200':
+          description: Отель успешно удален
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '404':
+          description: Отель не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '400':
+          description: Нельзя удалить отель с существующими комнатами
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /rooms:
+    get:
+      summary: Получить список комнат
+      description: Получить список комнат с возможностью фильтрации по отелю
+      tags: [rooms]
+      parameters:
+        - name: skip
+          in: query
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 100
+            minimum: 1
+            maximum: 1000
+        - name: hotel_id
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        '200':
+          description: Список комнат
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RoomRead'
+
+    post:
+      summary: Создать новую комнату
+      description: Создать новую комнату в отеле
+      tags: [rooms]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoomCreate'
+      responses:
+        '200':
+          description: Комната успешно создана
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoomRead'
+        '404':
+          description: Отель не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '400':
+          description: Комната с таким номером уже существует
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /rooms/available:
+    get:
+      summary: Найти доступные комнаты
+      description: Найти доступные комнаты в отеле на указанные даты
+      tags: [rooms]
+      parameters:
+        - name: hotel_id
+          in: query
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+        - name: check_in_date
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+            example: "2024-01-01"
+        - name: check_out_date
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+            example: "2024-01-05"
+        - name: min_price
+          in: query
+          schema:
+            type: number
+            format: float
+            minimum: 0
+        - name: max_price
+          in: query
+          schema:
+            type: number
+            format: float
+            minimum: 0
+      responses:
+        '200':
+          description: Список доступных комнат
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RoomRead'
+        '400':
+          description: Неверные параметры дат
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Отель не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /rooms/search/available:
+    get:
+      summary: Поиск доступных комнат
+      description: Расширенный поиск доступных комнат с фильтрами
+      tags: [rooms]
+      parameters:
+        - name: city
+          in: query
+          schema:
+            type: string
+        - name: country
+          in: query
+          schema:
+            type: string
+        - name: room_type
+          in: query
+          schema:
+            type: string
+        - name: check_in
+          in: query
+          schema:
+            type: string
+            format: date-time
+            example: "2024-01-01T14:00:00Z"
+        - name: check_out
+          in: query
+          schema:
+            type: string
+            format: date-time
+            example: "2024-01-05T12:00:00Z"
+        - name: guests
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+        - name: min_price
+          in: query
+          schema:
+            type: number
+            format: float
+            minimum: 0
+        - name: max_price
+          in: query
+          schema:
+            type: number
+            format: float
+            minimum: 0
+      responses:
+        '200':
+          description: Список доступных комнат с информацией об отелях
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RoomWithHotelRead'
+        '400':
+          description: Неверные параметры запроса
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /rooms/{room_id}:
+    get:
+      summary: Получить комнату по ID
+      description: Получить подробную информацию о комнате
+      tags: [rooms]
+      parameters:
+        - name: room_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        '200':
+          description: Информация о комнате
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoomWithHotelRead'
+        '404':
+          description: Комната не найдена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    put:
+      summary: Обновить информацию о комнате
+      description: Обновить информацию о комнате
+      tags: [rooms]
+      parameters:
+        - name: room_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoomUpdate'
+      responses:
+        '200':
+          description: Информация о комнате обновлена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoomRead'
+        '404':
+          description: Комната не найдена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '400':
+          description: Комната с таким номером уже существует
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      summary: Удалить комнату
+      description: Удалить комнату из системы
+      tags: [rooms]
+      parameters:
+        - name: room_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        '200':
+          description: Комната успешно удалена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '404':
+          description: Комната не найдена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '400':
+          description: Нельзя удалить комнату с активными бронированиями
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /rooms/{room_id}/status:
+    put:
+      summary: Обновить статус комнаты
+      description: Обновить статус комнаты (available, occupied, maintenance, cleaning)
+      tags: [rooms]
+      parameters:
+        - name: room_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+        - name: status
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [available, occupied, maintenance, cleaning]
+      responses:
+        '200':
+          description: Статус комнаты обновлен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '404':
+          description: Комната не найдена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '400':
+          description: Неверный статус
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /bookings:
+    get:
+      summary: Получить список бронирований
+      description: Получить список всех бронирований
+      tags: [bookings]
+      parameters:
+        - name: skip
+          in: query
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 100
+            minimum: 1
+            maximum: 1000
+      responses:
+        '200':
+          description: Список бронирований
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BookingWithDetailsRead'
+
+    post:
+      summary: Создать новое бронирование
+      description: Создать новое бронирование комнаты
+      tags: [bookings]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookingCreate'
+      responses:
+        '200':
+          description: Бронирование успешно создано
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingRead'
+        '400':
+          description: Ошибка валидации или комната недоступна
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Пользователь, отель или комната не найдены
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /bookings/{booking_id}:
+    get:
+      summary: Получить бронирование по ID
+      description: Получить подробную информацию о бронировании
+      tags: [bookings]
+      parameters:
+        - name: booking_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        '200':
+          description: Информация о бронировании
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingWithDetailsRead'
+        '404':
+          description: Бронирование не найдено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    put:
+      summary: Обновить информацию о бронировании
+      description: Обновить информацию о бронировании
+      tags: [bookings]
+      parameters:
+        - name: booking_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookingUpdate'
+      responses:
+        '200':
+          description: Информация о бронировании обновлена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingRead'
+        '404':
+          description: Бронирование не найдено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '400':
+          description: Нельзя изменить отмененное или завершенное бронирование
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /bookings/{booking_id}/cancel:
+    put:
+      summary: Отменить бронирование
+      description: Отменить существующее бронирование
+      tags: [bookings]
+      parameters:
+        - name: booking_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        '200':
+          description: Бронирование успешно отменено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '404':
+          description: Бронирование не найдено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '400':
+          description: Нельзя отменить завершенное бронирование
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /bookings/{booking_id}/check-in:
+    put:
+      summary: Зарегистрировать заезд
+      description: Зарегистрировать заезд гостя по бронированию
+      tags: [bookings]
+      parameters:
+        - name: booking_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        '200':
+          description: Заезд успешно зарегистрирован
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '404':
+          description: Бронирование не найдено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '400':
+          description: Можно зарегистрировать только подтвержденные бронирования
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /bookings/{booking_id}/check-out:
+    put:
+      summary: Зарегистрировать выезд
+      description: Зарегистрировать выезд гостя по бронированию
+      tags: [bookings]
+      parameters:
+        - name: booking_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        '200':
+          description: Выезд успешно зарегистрирован
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '404':
+          description: Бронирование не найдено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '400':
+          description: Можно зарегистрировать выезд только после заезда
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /bookings/user/{user_id}/bookings:
+    get:
+      summary: Получить бронирования пользователя
+      description: Получить все бронирования конкретного пользователя
+      tags: [bookings]
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        '200':
+          description: Список бронирований пользователя
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BookingWithDetailsRead'
+        '404':
+          description: Пользователь не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /users:
+    get:
+      summary: Получить список пользователей
+      description: Получить список всех пользователей
+      tags: [users]
+      parameters:
+        - name: skip
+          in: query
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 100
+            minimum: 1
+            maximum: 1000
+      responses:
+        '200':
+          description: Список пользователей
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserRead'
+
+    post:
+      summary: Создать нового пользователя
+      description: Создать нового пользователя в системе
+      tags: [users]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCreate'
+      responses:
+        '200':
+          description: Пользователь успешно создан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserRead'
+        '400':
+          description: Пользователь с таким email уже существует
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /users/{user_id}:
+    get:
+      summary: Получить пользователя по ID
+      description: Получить информацию о пользователе
+      tags: [users]
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        '200':
+          description: Информация о пользователе
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserRead'
+        '404':
+          description: Пользователь не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    put:
+      summary: Обновить информацию о пользователе
+      description: Обновить информацию о пользователе
+      tags: [users]
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserUpdate'
+      responses:
+        '200':
+          description: Информация о пользователе обновлена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserRead'
+        '404':
+          description: Пользователь не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '400':
+          description: Пользователь с таким email уже существует
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      summary: Удалить пользователя
+      description: Удалить пользователя из системы
+      tags: [users]
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        '200':
+          description: Пользователь успешно удален
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '404':
+          description: Пользователь не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '400':
+          description: Нельзя удалить пользователя с активными бронированиями
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+
+  /tasks/send-booking-confirmation:
+    post:
+      summary: Отправить подтверждение бронирования
+      description: Запустить фоновую задачу отправки email с подтверждением бронирования
+      tags: [tasks]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmailTaskData'
+      responses:
+        '200':
+          description: Задача отправки email поставлена в очередь
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskResponse'
+        '500':
+          description: Ошибка при постановке задачи в очередь
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /tasks/generate-report:
+    post:
+      summary: Сгенерировать отчет
+      description: Запустить фоновую задачу генерации отчета по отелю
+      tags: [tasks]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReportTaskData'
+      responses:
+        '200':
+          description: Задача генерации отчета поставлена в очередь
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskResponse'
+        '500':
+          description: Ошибка при постановке задачи в очередь
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /tasks/analyze-bookings:
+    post:
+      summary: Проанализировать бронирования
+      description: Запустить фоновую задачу аналитики бронирований
+      tags: [tasks]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AnalyticsTaskData'
+      responses:
+        '200':
+          description: Задача аналитики поставлена в очередь
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskResponse'
+        '500':
+          description: Ошибка при постановке задачи в очередь
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /tasks/status/{task_id}:
+    get:
+      summary: Получить статус задачи
+      description: Получить статус фоновой задачи Celery по её ID
+      tags: [tasks]
+      parameters:
+        - name: task_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Статус задачи
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskStatusResponse'
+        '500':
+          description: Ошибка при получении статуса задачи
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /tasks/cache/stats:
+    get:
+      summary: Получить статистику кэша
+      description: Получить статистику использования кэша Redis
+      tags: [tasks]
+      responses:
+        '200':
+          description: Статистика кэша
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total_bookings:
+                    type: integer
+                  popular_rooms:
+                    type: array
+                    items:
+                      type: string
+                  popular_hotels:
+                    type: array
+                    items:
+                      type: string
+        '500':
+          description: Ошибка при получении статистики кэша
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /tasks/cache/clear:
+    post:
+      summary: Очистить кэш
+      description: Очистить кэш Redis по шаблону
+      tags: [tasks]
+      parameters:
+        - name: pattern
+          in: query
+          schema:
+            type: string
+            default: "*"
+      responses:
+        '200':
+          description: Кэш очищен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '500':
+          description: Ошибка при очистке кэша
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    MessageResponse:
+      type: object
+      properties:
+        message:
+          type: string
+      required:
+        - message
+
+    ErrorResponse:
+      type: object
+      properties:
+        detail:
+          type: string
+      required:
+        - detail
+
+    TaskResponse:
+      type: object
+      properties:
+        task_id:
+          type: string
+        status:
+          type: string
+        message:
+          type: string
+      required:
+        - task_id
+        - status
+        - message
+
+    TaskStatusResponse:
+      type: object
+      properties:
+        task_id:
+          type: string
+        status:
+          type: string
+        result:
+          type: object
+          nullable: true
+        error:
+          type: string
+          nullable: true
+      required:
+        - task_id
+        - status
+
+    EmailTaskData:
+      type: object
+      properties:
+        to_email:
+          type: string
+          format: email
+        user_name:
+          type: string
+        booking_data:
+          type: object
+      required:
+        - to_email
+        - user_name
+        - booking_data
+
+    ReportTaskData:
+      type: object
+      properties:
+        hotel_id:
+          type: integer
+        start_date:
+          type: string
+          format: date
+        end_date:
+          type: string
+          format: date
+        report_type:
+          type: string
+      required:
+        - hotel_id
+        - start_date
+        - end_date
+        - report_type
+
+    AnalyticsTaskData:
+      type: object
+      properties:
+        hotel_id:
+          type: integer
+          nullable: true
+        period:
+          type: string
+      required:
+        - period
+
+    HotelBase:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 100
+        description:
+          type: string
+          nullable: true
+        address:
+          type: string
+          maxLength: 200
+        city:
+          type: string
+          maxLength: 50
+        country:
+          type: string
+          maxLength: 50
+        rating:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 5
+          default: 0.0
+      required:
+        - name
+        - address
+        - city
+        - country
+
+    HotelCreate:
+      allOf:
+        - $ref: '#/components/schemas/HotelBase'
+
+    HotelUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 100
+          nullable: true
+        description:
+          type: string
+          nullable: true
+        address:
+          type: string
+          maxLength: 200
+          nullable: true
+        city:
+          type: string
+          maxLength: 50
+          nullable: true
+        country:
+          type: string
+          maxLength: 50
+          nullable: true
+        rating:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 5
+          nullable: true
+
+    HotelRead:
+      allOf:
+        - $ref: '#/components/schemas/HotelBase'
+        - type: object
+          properties:
+            id:
+              type: integer
+            created_at:
+              type: string
+              format: date-time
+          required:
+            - id
+            - created_at
+
+    RoomBase:
+      type: object
+      properties:
+        room_number:
+          type: string
+          maxLength: 10
+        floor:
+          type: integer
+        room_type:
+          type: string
+          maxLength: 50
+        description:
+          type: string
+          nullable: true
+        price_per_night:
+          type: number
+          format: float
+          minimum: 0
+        capacity:
+          type: integer
+          minimum: 1
+        amenities:
+          type: string
+          nullable: true
+        status:
+          type: string
+          enum: [available, occupied, maintenance, cleaning]
+      required:
+        - room_number
+        - floor
+        - room_type
+        - price_per_night
+        - capacity
+        - status
+
+    RoomCreate:
+      allOf:
+        - $ref: '#/components/schemas/RoomBase'
+        - type: object
+          properties:
+            hotel_id:
+              type: integer
+          required:
+            - hotel_id
+
+    RoomUpdate:
+      type: object
+      properties:
+        room_number:
+          type: string
+          maxLength: 10
+          nullable: true
+        floor:
+          type: integer
+          nullable: true
+        room_type:
+          type: string
+          maxLength: 50
+          nullable: true
+        description:
+          type: string
+          nullable: true
+        price_per_night:
+          type: number
+          format: float
+          minimum: 0
+          nullable: true
+        capacity:
+          type: integer
+          minimum: 1
+          nullable: true
+        amenities:
+          type: string
+          nullable: true
+        status:
+          type: string
+          enum: [available, occupied, maintenance, cleaning]
+          nullable: true
+
+    RoomRead:
+      allOf:
+        - $ref: '#/components/schemas/RoomBase'
+        - type: object
+          properties:
+            id:
+              type: integer
+            hotel_id:
+              type: integer
+            created_at:
+              type: string
+              format: date-time
+          required:
+            - id
+            - hotel_id
+            - created_at
+
+    RoomWithHotelRead:
+      allOf:
+        - $ref: '#/components/schemas/RoomRead'
+        - type: object
+          properties:
+            hotel:
+              $ref: '#/components/schemas/HotelRead'
+          required:
+            - hotel
+
+    UserBase:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          maxLength: 100
+        first_name:
+          type: string
+          maxLength: 50
+        last_name:
+          type: string
+          maxLength: 50
+        phone:
+          type: string
+          maxLength: 20
+          nullable: true
+      required:
+        - email
+        - first_name
+        - last_name
+
+    UserCreate:
+      allOf:
+        - $ref: '#/components/schemas/UserBase'
+
+    UserUpdate:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          maxLength: 100
+          nullable: true
+        first_name:
+          type: string
+          maxLength: 50
+          nullable: true
+        last_name:
+          type: string
+          maxLength: 50
+          nullable: true
+        phone:
+          type: string
+          maxLength: 20
+          nullable: true
+
+    UserRead:
+      allOf:
+        - $ref: '#/components/schemas/UserBase'
+        - type: object
+          properties:
+            id:
+              type: integer
+            created_at:
+              type: string
+              format: date-time
+          required:
+            - id
+            - created_at
+
+    BookingBase:
+      type: object
+      properties:
+        user_id:
+          type: integer
+        hotel_id:
+          type: integer
+        room_id:
+          type: integer
+        check_in_date:
+          type: string
+          format: date-time
+        check_out_date:
+          type: string
+          format: date-time
+        number_of_guests:
+          type: integer
+          minimum: 1
+        special_requests:
+          type: string
+          nullable: true
+      required:
+        - user_id
+        - hotel_id
+        - room_id
+        - check_in_date
+        - check_out_date
+        - number_of_guests
+
+    BookingCreate:
+      allOf:
+        - $ref: '#/components/schemas/BookingBase'
+
+    BookingUpdate:
+      type: object
+      properties:
+        check_in_date:
+          type: string
+          format: date-time
+          nullable: true
+        check_out_date:
+          type: string
+          format: date-time
+          nullable: true
+        number_of_guests:
+          type: integer
+          minimum: 1
+          nullable: true
+        special_requests:
+          type: string
+          nullable: true
+        status:
+          type: string
+          enum: [confirmed, cancelled, completed, checked_in, checked_out]
+          nullable: true
+
+    BookingRead:
+      allOf:
+        - $ref: '#/components/schemas/BookingBase'
+        - type: object
+          properties:
+            id:
+              type: integer
+            booking_reference:
+              type: string
+            total_price:
+              type: number
+              format: float
+              minimum: 0
+            status:
+              type: string
+              enum: [confirmed, cancelled, completed, checked_in, checked_out]
+            created_at:
+              type: string
+              format: date-time
+          required:
+            - id
+            - booking_reference
+            - total_price
+            - status
+            - created_at
+
+    BookingWithDetailsRead:
+      allOf:
+        - $ref: '#/components/schemas/BookingRead'
+        - type: object
+          properties:
+            user:
+              $ref: '#/components/schemas/UserRead'
+            hotel:
+              $ref: '#/components/schemas/HotelRead'
+            room:
+              $ref: '#/components/schemas/RoomRead'
+          required:
+            - user
+            - hotel
+            - room
+
+    AvailabilitySearch:
+      type: object
+      properties:
+        city:
+          type: string
+          nullable: true
+        country:
+          type: string
+          nullable: true
+        room_type:
+          type: string
+          nullable: true
+        check_in:
+          type: string
+          format: date-time
+          nullable: true
+        check_out:
+          type: string
+          format: date-time
+          nullable: true
+        guests:
+          type: integer
+          minimum: 1
+          nullable: true
+        min_price:
+          type: number
+          format: float
+          minimum: 0
+          nullable: true
+        max_price:
+          type: number
+          format: float
+          minimum: 0
+          nullable: true

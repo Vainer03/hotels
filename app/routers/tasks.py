@@ -66,6 +66,7 @@ async def init_mock_data():
             
             db.flush()
             
+            rooms = []
             for hotel in hotels:
                 for i in range(5): 
                     room = Room(
@@ -80,6 +81,7 @@ async def init_mock_data():
                         status="available"
                     )
                     db.add(room)
+                    rooms.append(room)
             
             users_data = [
                 {"email": "ivan.petrov@example.com", "first_name": "Иван", "last_name": "Петров", "phone": "+79991234567"},
@@ -87,10 +89,46 @@ async def init_mock_data():
                 {"email": "alex.smirnov@example.com", "first_name": "Алексей", "last_name": "Смирнов", "phone": "+79993456789"}
             ]
             
+            users = []
             for user_data in users_data:
                 user = User(**user_data)
                 db.add(user)
+                users.append(user)
+
+            db.flush()
+
+            booking_statuses = ["confirmed", "confirmed", "confirmed", "completed", "checked_in"]
             
+            # Создаем несколько бронирований
+            for i in range(3):  # 15 тестовых бронирований
+                user = random.choice(users)
+                room = random.choice(rooms)
+                
+                # Генерируем случайные даты
+                days_from_now = random.randint(1, 60)
+                check_in_date = datetime.now() + timedelta(days=days_from_now)
+                check_out_date = check_in_date + timedelta(days=random.randint(1, 7))
+                
+                nights = (check_out_date - check_in_date).days
+                total_price = nights * room.price_per_night
+                
+                booking = Booking(
+                    user_id=user.id,
+                    hotel_id=room.hotel_id,
+                    room_id=room.id,
+                    check_in_date=check_in_date,
+                    check_out_date=check_out_date,
+                    number_of_guests=random.randint(1, room.capacity),
+                    total_price=total_price,
+                    status=random.choice(booking_statuses),
+                    special_requests=random.choice([None, "Прошу детскую кроватку", "Хочу номер с видом на море", "Поздний заезд"])
+                )
+                db.add(booking)
+                
+                # Обновляем статус комнаты если бронирование активно
+                if booking.status in ["confirmed", "checked_in"]:
+                    room.status = "occupied"
+            db.flush()
             db.commit()
             
             return {"message": "Моковые данные успешно созданы! Перезагрузите страницу."}
