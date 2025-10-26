@@ -1,0 +1,4317 @@
+{
+	"info": {
+		"_postman_id": "2fb0fd05-60b8-44e6-bb9c-73d19eaa8c43",
+		"name": "Hotel Booking API Copy 8",
+		"description": "Полнофункциональное API для бронирования отелей с RabbitMQ, Redis и Celery\n\nContact Support:\n Name: API Support\n Email: support@hotelbooking.com",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "48256399",
+		"_collection_link": "https://vainer-ag-4087521.postman.co/workspace/Vainer-Anastasiia's-Workspace~dc5359d5-9e4c-4d33-8147-5f2643219c58/collection/48256399-2fb0fd05-60b8-44e6-bb9c-73d19eaa8c43?action=share&source=collection_link&creator=48256399"
+	},
+	"item": [
+		{
+			"name": "/",
+			"item": [
+				{
+					"name": "Корневой эндпоинт",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								""
+							]
+						},
+						"description": "Проверка работоспособности API"
+					},
+					"response": [
+						{
+							"name": "API работает корректно",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										""
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"message\": \"Hotel Booking API is running!\",\n  \"version\": \"2.2.0\",\n  \"status\": \"healthy\"\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "health",
+			"item": [
+				{
+					"name": "Проверка состояния сервисов",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/health",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"health"
+							]
+						},
+						"description": "Проверка статуса всех подключенных сервисов (база данных, Redis, RabbitMQ)"
+					},
+					"response": [
+						{
+							"name": "Статус сервисов",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/health",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"health"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"status\": \"unhealthy\",\n  \"services\": {\n    \"api\": \"string\",\n    \"database\": \"string\",\n    \"rabbitmq\": \"string\",\n    \"redis\": \"string\"\n  },\n  \"timestamp\": \"2024-12-12T06:52:38.127Z\"\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "tasks",
+			"item": [
+				{
+					"name": "init-mock-data",
+					"item": [
+						{
+							"name": "Инициализировать моковые данные",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/tasks/init-mock-data",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"tasks",
+										"init-mock-data"
+									]
+								},
+								"description": "Создать тестовые данные для разработки (отели, комнаты, пользователи, бронирования)"
+							},
+							"response": [
+								{
+									"name": "Моковые данные успешно созданы",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/tasks/init-mock-data",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"tasks",
+												"init-mock-data"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n  \"message\": \"string\"\n}"
+								},
+								{
+									"name": "Ошибка при создании моковых данных",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/tasks/init-mock-data",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"tasks",
+												"init-mock-data"
+											]
+										}
+									},
+									"status": "Internal Server Error",
+									"code": 500,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n  \"detail\": \"string\"\n}"
+								}
+							]
+						}
+					]
+				},
+				{
+					"name": "send-booking-confirmation",
+					"item": [
+						{
+							"name": "Отправить подтверждение бронирования",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"to_email\": \"JTmMh@WaXgZzXvwFoJjjG.ffv\",\n  \"user_name\": \"string\",\n  \"booking_data\": {}\n}",
+									"options": {
+										"raw": {
+											"headerFamily": "json",
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/tasks/send-booking-confirmation",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"tasks",
+										"send-booking-confirmation"
+									]
+								},
+								"description": "Запустить фоновую задачу отправки email с подтверждением бронирования"
+							},
+							"response": [
+								{
+									"name": "Задача отправки email поставлена в очередь",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "Accept",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"to_email\": \"JTmMh@WaXgZzXvwFoJjjG.ffv\",\n  \"user_name\": \"string\",\n  \"booking_data\": {}\n}",
+											"options": {
+												"raw": {
+													"headerFamily": "json",
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{baseUrl}}/tasks/send-booking-confirmation",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"tasks",
+												"send-booking-confirmation"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n  \"task_id\": \"string\",\n  \"status\": \"string\",\n  \"message\": \"string\"\n}"
+								},
+								{
+									"name": "Ошибка при постановке задачи в очередь",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "Accept",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"to_email\": \"JTmMh@WaXgZzXvwFoJjjG.ffv\",\n  \"user_name\": \"string\",\n  \"booking_data\": {}\n}",
+											"options": {
+												"raw": {
+													"headerFamily": "json",
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{baseUrl}}/tasks/send-booking-confirmation",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"tasks",
+												"send-booking-confirmation"
+											]
+										}
+									},
+									"status": "Internal Server Error",
+									"code": 500,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n  \"detail\": \"string\"\n}"
+								}
+							]
+						}
+					]
+				},
+				{
+					"name": "generate-report",
+					"item": [
+						{
+							"name": "Сгенерировать отчет",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"hotel_id\": 4506,\n  \"start_date\": \"2017-07-09\",\n  \"end_date\": \"1993-03-07\",\n  \"report_type\": \"string\"\n}",
+									"options": {
+										"raw": {
+											"headerFamily": "json",
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/tasks/generate-report",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"tasks",
+										"generate-report"
+									]
+								},
+								"description": "Запустить фоновую задачу генерации отчета по отелю"
+							},
+							"response": [
+								{
+									"name": "Задача генерации отчета поставлена в очередь",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "Accept",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"hotel_id\": 4506,\n  \"start_date\": \"2017-07-09\",\n  \"end_date\": \"1993-03-07\",\n  \"report_type\": \"string\"\n}",
+											"options": {
+												"raw": {
+													"headerFamily": "json",
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{baseUrl}}/tasks/generate-report",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"tasks",
+												"generate-report"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n  \"task_id\": \"string\",\n  \"status\": \"string\",\n  \"message\": \"string\"\n}"
+								},
+								{
+									"name": "Ошибка при постановке задачи в очередь",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "Accept",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"hotel_id\": 4506,\n  \"start_date\": \"2017-07-09\",\n  \"end_date\": \"1993-03-07\",\n  \"report_type\": \"string\"\n}",
+											"options": {
+												"raw": {
+													"headerFamily": "json",
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{baseUrl}}/tasks/generate-report",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"tasks",
+												"generate-report"
+											]
+										}
+									},
+									"status": "Internal Server Error",
+									"code": 500,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n  \"detail\": \"string\"\n}"
+								}
+							]
+						}
+					]
+				},
+				{
+					"name": "analyze-bookings",
+					"item": [
+						{
+							"name": "Проанализировать бронирования",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"period\": \"string\",\n  \"hotel_id\": 7821\n}",
+									"options": {
+										"raw": {
+											"headerFamily": "json",
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/tasks/analyze-bookings",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"tasks",
+										"analyze-bookings"
+									]
+								},
+								"description": "Запустить фоновую задачу аналитики бронирований"
+							},
+							"response": [
+								{
+									"name": "Задача аналитики поставлена в очередь",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "Accept",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"period\": \"string\",\n  \"hotel_id\": 7821\n}",
+											"options": {
+												"raw": {
+													"headerFamily": "json",
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{baseUrl}}/tasks/analyze-bookings",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"tasks",
+												"analyze-bookings"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n  \"task_id\": \"string\",\n  \"status\": \"string\",\n  \"message\": \"string\"\n}"
+								},
+								{
+									"name": "Ошибка при постановке задачи в очередь",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "Accept",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"period\": \"string\",\n  \"hotel_id\": 7821\n}",
+											"options": {
+												"raw": {
+													"headerFamily": "json",
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{baseUrl}}/tasks/analyze-bookings",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"tasks",
+												"analyze-bookings"
+											]
+										}
+									},
+									"status": "Internal Server Error",
+									"code": 500,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n  \"detail\": \"string\"\n}"
+								}
+							]
+						}
+					]
+				},
+				{
+					"name": "status",
+					"item": [
+						{
+							"name": "{task_id}",
+							"item": [
+								{
+									"name": "Получить статус задачи",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/tasks/status/:task_id",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"tasks",
+												"status",
+												":task_id"
+											],
+											"variable": [
+												{
+													"key": "task_id",
+													"value": "string"
+												}
+											]
+										},
+										"description": "Получить статус фоновой задачи Celery по её ID"
+									},
+									"response": [
+										{
+											"name": "Статус задачи",
+											"originalRequest": {
+												"method": "GET",
+												"header": [
+													{
+														"key": "Accept",
+														"value": "application/json"
+													}
+												],
+												"url": {
+													"raw": "{{baseUrl}}/tasks/status/:task_id",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"tasks",
+														"status",
+														":task_id"
+													],
+													"variable": [
+														{
+															"key": "task_id"
+														}
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json"
+												}
+											],
+											"cookie": [],
+											"body": "{\n  \"task_id\": \"string\",\n  \"status\": \"string\",\n  \"result\": {},\n  \"error\": \"string\"\n}"
+										},
+										{
+											"name": "Ошибка при получении статуса задачи",
+											"originalRequest": {
+												"method": "GET",
+												"header": [
+													{
+														"key": "Accept",
+														"value": "application/json"
+													}
+												],
+												"url": {
+													"raw": "{{baseUrl}}/tasks/status/:task_id",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"tasks",
+														"status",
+														":task_id"
+													],
+													"variable": [
+														{
+															"key": "task_id"
+														}
+													]
+												}
+											},
+											"status": "Internal Server Error",
+											"code": 500,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json"
+												}
+											],
+											"cookie": [],
+											"body": "{\n  \"detail\": \"string\"\n}"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"name": "cache",
+					"item": [
+						{
+							"name": "stats",
+							"item": [
+								{
+									"name": "Получить статистику кэша",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/tasks/cache/stats",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"tasks",
+												"cache",
+												"stats"
+											]
+										},
+										"description": "Получить статистику использования кэша Redis"
+									},
+									"response": [
+										{
+											"name": "Статистика кэша",
+											"originalRequest": {
+												"method": "GET",
+												"header": [
+													{
+														"key": "Accept",
+														"value": "application/json"
+													}
+												],
+												"url": {
+													"raw": "{{baseUrl}}/tasks/cache/stats",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"tasks",
+														"cache",
+														"stats"
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json"
+												}
+											],
+											"cookie": [],
+											"body": "{\n  \"total_bookings\": 2790,\n  \"popular_rooms\": [\n    \"string\",\n    \"string\"\n  ],\n  \"popular_hotels\": [\n    \"string\",\n    \"string\"\n  ]\n}"
+										},
+										{
+											"name": "Ошибка при получении статистики кэша",
+											"originalRequest": {
+												"method": "GET",
+												"header": [
+													{
+														"key": "Accept",
+														"value": "application/json"
+													}
+												],
+												"url": {
+													"raw": "{{baseUrl}}/tasks/cache/stats",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"tasks",
+														"cache",
+														"stats"
+													]
+												}
+											},
+											"status": "Internal Server Error",
+											"code": 500,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json"
+												}
+											],
+											"cookie": [],
+											"body": "{\n  \"detail\": \"string\"\n}"
+										}
+									]
+								}
+							]
+						},
+						{
+							"name": "clear",
+							"item": [
+								{
+									"name": "Очистить кэш",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/tasks/cache/clear?pattern=*",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"tasks",
+												"cache",
+												"clear"
+											],
+											"query": [
+												{
+													"key": "pattern",
+													"value": "*"
+												}
+											]
+										},
+										"description": "Очистить кэш Redis по шаблону"
+									},
+									"response": [
+										{
+											"name": "Кэш очищен",
+											"originalRequest": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Accept",
+														"value": "application/json"
+													}
+												],
+												"url": {
+													"raw": "{{baseUrl}}/tasks/cache/clear?pattern=*",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"tasks",
+														"cache",
+														"clear"
+													],
+													"query": [
+														{
+															"key": "pattern",
+															"value": "*"
+														}
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json"
+												}
+											],
+											"cookie": [],
+											"body": "{\n  \"message\": \"string\"\n}"
+										},
+										{
+											"name": "Ошибка при очистке кэша",
+											"originalRequest": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Accept",
+														"value": "application/json"
+													}
+												],
+												"url": {
+													"raw": "{{baseUrl}}/tasks/cache/clear?pattern=*",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"tasks",
+														"cache",
+														"clear"
+													],
+													"query": [
+														{
+															"key": "pattern",
+															"value": "*"
+														}
+													]
+												}
+											},
+											"status": "Internal Server Error",
+											"code": 500,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json"
+												}
+											],
+											"cookie": [],
+											"body": "{\n  \"detail\": \"string\"\n}"
+										}
+									]
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "hotels",
+			"item": [
+				{
+					"name": "{hotel_id}",
+					"item": [
+						{
+							"name": "Получить отель по ID",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/hotels/{{hotel_id_1}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"hotels",
+										"{{hotel_id_1}}"
+									]
+								},
+								"description": "Получить подробную информацию об отеле по его идентификатору"
+							},
+							"response": [
+								{
+									"name": "Информация об отеле",
+									"originalRequest": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/hotels/:hotel_id",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"hotels",
+												":hotel_id"
+											],
+											"variable": [
+												{
+													"key": "hotel_id"
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n  \"name\": \"string\",\n  \"address\": \"string\",\n  \"city\": \"string\",\n  \"country\": \"string\",\n  \"id\": 2014,\n  \"created_at\": \"1953-03-22T21:52:05.565Z\",\n  \"description\": \"string\",\n  \"rating\": 0\n}"
+								},
+								{
+									"name": "Отель не найден",
+									"originalRequest": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/hotels/:hotel_id",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"hotels",
+												":hotel_id"
+											],
+											"variable": [
+												{
+													"key": "hotel_id"
+												}
+											]
+										}
+									},
+									"status": "Not Found",
+									"code": 404,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n  \"detail\": \"string\"\n}"
+								}
+							]
+						},
+						{
+							"name": "Обновить информацию об отеле",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"string\",\n  \"description\": \"string\",\n  \"address\": \"string\",\n  \"city\": \"string\",\n  \"country\": \"string\",\n  \"rating\": 0\n}",
+									"options": {
+										"raw": {
+											"headerFamily": "json",
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/hotels/{{hotel_id_1}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"hotels",
+										"{{hotel_id_1}}"
+									]
+								},
+								"description": "Обновить информацию об отеле (требуется аутентификация администратора)"
+							},
+							"response": [
+								{
+									"name": "Информация об отеле обновлена",
+									"originalRequest": {
+										"method": "PUT",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "Accept",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"name\": \"string\",\n  \"description\": \"string\",\n  \"address\": \"string\",\n  \"city\": \"string\",\n  \"country\": \"string\",\n  \"rating\": 0\n}",
+											"options": {
+												"raw": {
+													"headerFamily": "json",
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{baseUrl}}/hotels/:hotel_id",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"hotels",
+												":hotel_id"
+											],
+											"variable": [
+												{
+													"key": "hotel_id"
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n  \"name\": \"string\",\n  \"address\": \"string\",\n  \"city\": \"string\",\n  \"country\": \"string\",\n  \"id\": 2014,\n  \"created_at\": \"1953-03-22T21:52:05.565Z\",\n  \"description\": \"string\",\n  \"rating\": 0\n}"
+								},
+								{
+									"name": "Отель не найден",
+									"originalRequest": {
+										"method": "PUT",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "Accept",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"name\": \"string\",\n  \"description\": \"string\",\n  \"address\": \"string\",\n  \"city\": \"string\",\n  \"country\": \"string\",\n  \"rating\": 0\n}",
+											"options": {
+												"raw": {
+													"headerFamily": "json",
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{baseUrl}}/hotels/:hotel_id",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"hotels",
+												":hotel_id"
+											],
+											"variable": [
+												{
+													"key": "hotel_id"
+												}
+											]
+										}
+									},
+									"status": "Not Found",
+									"code": 404,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n  \"detail\": \"string\"\n}"
+								},
+								{
+									"name": "Неавторизованный доступ",
+									"originalRequest": {
+										"method": "PUT",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "Accept",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"name\": \"string\",\n  \"description\": \"string\",\n  \"address\": \"string\",\n  \"city\": \"string\",\n  \"country\": \"string\",\n  \"rating\": 0\n}",
+											"options": {
+												"raw": {
+													"headerFamily": "json",
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{baseUrl}}/hotels/:hotel_id",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"hotels",
+												":hotel_id"
+											],
+											"variable": [
+												{
+													"key": "hotel_id"
+												}
+											]
+										}
+									},
+									"status": "Forbidden",
+									"code": 403,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n  \"detail\": \"string\"\n}"
+								}
+							]
+						},
+						{
+							"name": "Удалить отель",
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/hotels/{{hotel_id_1}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"hotels",
+										"{{hotel_id_1}}"
+									]
+								},
+								"description": "Удалить отель (требуется аутентификация администратора)"
+							},
+							"response": [
+								{
+									"name": "Отель удален",
+									"originalRequest": {
+										"method": "DELETE",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/hotels/:hotel_id",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"hotels",
+												":hotel_id"
+											],
+											"variable": [
+												{
+													"key": "hotel_id"
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n  \"message\": \"string\"\n}"
+								},
+								{
+									"name": "Отель не найден",
+									"originalRequest": {
+										"method": "DELETE",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/hotels/:hotel_id",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"hotels",
+												":hotel_id"
+											],
+											"variable": [
+												{
+													"key": "hotel_id"
+												}
+											]
+										}
+									},
+									"status": "Not Found",
+									"code": 404,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n  \"detail\": \"string\"\n}"
+								},
+								{
+									"name": "Неавторизованный доступ",
+									"originalRequest": {
+										"method": "DELETE",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/hotels/:hotel_id",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"hotels",
+												":hotel_id"
+											],
+											"variable": [
+												{
+													"key": "hotel_id"
+												}
+											]
+										}
+									},
+									"status": "Forbidden",
+									"code": 403,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n  \"detail\": \"string\"\n}"
+								}
+							]
+						}
+					]
+				},
+				{
+					"name": "Получить список отелей",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/hotels?city=Moscow&country=Russia&rating=4&page=1&size=10",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"hotels"
+							],
+							"query": [
+								{
+									"key": "city",
+									"value": "Moscow"
+								},
+								{
+									"key": "country",
+									"value": "Russia"
+								},
+								{
+									"key": "rating",
+									"value": "4"
+								},
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								}
+							]
+						},
+						"description": "Получить список отелей с фильтрацией по городу, стране, рейтингу и пагинацией"
+					},
+					"response": [
+						{
+							"name": "Список отелей",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/hotels?city=Moscow&country=Russia&rating=4&page=1&size=10",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"hotels"
+									],
+									"query": [
+										{
+											"key": "city",
+											"value": "Moscow"
+										},
+										{
+											"key": "country",
+											"value": "Russia"
+										},
+										{
+											"key": "rating",
+											"value": "4"
+										},
+										{
+											"key": "page",
+											"value": "1"
+										},
+										{
+											"key": "size",
+											"value": "10"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "[\n  {\n    \"name\": \"string\",\n    \"address\": \"string\",\n    \"city\": \"string\",\n    \"country\": \"string\",\n    \"id\": 2014,\n    \"created_at\": \"1953-03-22T21:52:05.565Z\",\n    \"description\": \"string\",\n    \"rating\": 0\n  },\n  {\n    \"name\": \"string\",\n    \"address\": \"string\",\n    \"city\": \"string\",\n    \"country\": \"string\",\n    \"id\": 2014,\n    \"created_at\": \"1953-03-22T21:52:05.565Z\",\n    \"description\": \"string\",\n    \"rating\": 0\n  }\n]"
+						},
+						{
+							"name": "Ошибка при получении списка отелей",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/hotels?city=Moscow&country=Russia&rating=4&page=1&size=10",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"hotels"
+									],
+									"query": [
+										{
+											"key": "city",
+											"value": "Moscow"
+										},
+										{
+											"key": "country",
+											"value": "Russia"
+										},
+										{
+											"key": "rating",
+											"value": "4"
+										},
+										{
+											"key": "page",
+											"value": "1"
+										},
+										{
+											"key": "size",
+											"value": "10"
+										}
+									]
+								}
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"detail\": \"string\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Создать новый отель",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"string\",\n  \"description\": \"string\",\n  \"address\": \"string\",\n  \"city\": \"string\",\n  \"country\": \"string\",\n  \"rating\": 0\n}",
+							"options": {
+								"raw": {
+									"headerFamily": "json",
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/hotels",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"hotels"
+							]
+						},
+						"description": "Создать новый отель (требуется аутентификация администратора)"
+					},
+					"response": [
+						{
+							"name": "Отель создан",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"string\",\n  \"description\": \"string\",\n  \"address\": \"string\",\n  \"city\": \"string\",\n  \"country\": \"string\",\n  \"rating\": 0\n}",
+									"options": {
+										"raw": {
+											"headerFamily": "json",
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/hotels",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"hotels"
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"name\": \"string\",\n  \"address\": \"string\",\n  \"city\": \"string\",\n  \"country\": \"string\",\n  \"id\": 2014,\n  \"created_at\": \"1953-03-22T21:52:05.565Z\",\n  \"description\": \"string\",\n  \"rating\": 0\n}"
+						},
+						{
+							"name": "Неавторизованный доступ",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"string\",\n  \"description\": \"string\",\n  \"address\": \"string\",\n  \"city\": \"string\",\n  \"country\": \"string\",\n  \"rating\": 0\n}",
+									"options": {
+										"raw": {
+											"headerFamily": "json",
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/hotels",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"hotels"
+									]
+								}
+							},
+							"status": "Forbidden",
+							"code": 403,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"detail\": \"string\"\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "rooms",
+			"item": [
+				{
+					"name": "{room_id}",
+					"item": [
+						{
+							"name": "Получить комнату по ID",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/rooms/{{room_id_1}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"rooms",
+										"{{room_id_1}}"
+									]
+								},
+								"description": "Получить подробную информацию о комнате по её идентификатору"
+							},
+							"response": [
+								{
+									"name": "Информация о комнате",
+									"originalRequest": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/rooms/:room_id",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"rooms",
+												":room_id"
+											],
+											"variable": [
+												{
+													"key": "room_id"
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n  \"hotel_id\": 2014,\n  \"number\": \"string\",\n  \"price\": 0,\n  \"id\": 2014,\n  \"created_at\": \"1953-03-22T21:52:05.565Z\",\n  \"description\": \"string\",\n  \"capacity\": 0,\n  \"room_type\": \"string\"\n}"
+								},
+								{
+									"name": "Комната не найдена",
+									"originalRequest": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/rooms/:room_id",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"rooms",
+												":room_id"
+											],
+											"variable": [
+												{
+													"key": "room_id"
+												}
+											]
+										}
+									},
+									"status": "Not Found",
+									"code": 404,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n  \"detail\": \"string\"\n}"
+								}
+							]
+						},
+						{
+							"name": "Обновить информацию о комнате",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"number\": \"string\",\n  \"description\": \"string\",\n  \"price\": 0,\n  \"capacity\": 0,\n  \"room_type\": \"string\"\n}",
+									"options": {
+										"raw": {
+											"headerFamily": "json",
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/rooms/{{room_id_1}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"rooms",
+										"{{room_id_1}}"
+									]
+								},
+								"description": "Обновить информацию о комнате (требуется аутентификация администратора)"
+							},
+							"response": [
+								{
+									"name": "Информация о комнате обновлена",
+									"originalRequest": {
+										"method": "PUT",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "Accept",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"number\": \"string\",\n  \"description\": \"string\",\n  \"price\": 0,\n  \"capacity\": 0,\n  \"room_type\": \"string\"\n}",
+											"options": {
+												"raw": {
+													"headerFamily": "json",
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{baseUrl}}/rooms/:room_id",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"rooms",
+												":room_id"
+											],
+											"variable": [
+												{
+													"key": "room_id"
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n  \"hotel_id\": 2014,\n  \"number\": \"string\",\n  \"price\": 0,\n  \"id\": 2014,\n  \"created_at\": \"1953-03-22T21:52:05.565Z\",\n  \"description\": \"string\",\n  \"capacity\": 0,\n  \"room_type\": \"string\"\n}"
+								},
+								{
+									"name": "Комната не найдена",
+									"originalRequest": {
+										"method": "PUT",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "Accept",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"number\": \"string\",\n  \"description\": \"string\",\n  \"price\": 0,\n  \"capacity\": 0,\n  \"room_type\": \"string\"\n}",
+											"options": {
+												"raw": {
+													"headerFamily": "json",
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{baseUrl}}/rooms/:room_id",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"rooms",
+												":room_id"
+											],
+											"variable": [
+												{
+													"key": "room_id"
+												}
+											]
+										}
+									},
+									"status": "Not Found",
+									"code": 404,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n  \"detail\": \"string\"\n}"
+								},
+								{
+									"name": "Неавторизованный доступ",
+									"originalRequest": {
+										"method": "PUT",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "Accept",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"number\": \"string\",\n  \"description\": \"string\",\n  \"price\": 0,\n  \"capacity\": 0,\n  \"room_type\": \"string\"\n}",
+											"options": {
+												"raw": {
+													"headerFamily": "json",
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{baseUrl}}/rooms/:room_id",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"rooms",
+												":room_id"
+											],
+											"variable": [
+												{
+													"key": "room_id"
+												}
+											]
+										}
+									},
+									"status": "Forbidden",
+									"code": 403,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n  \"detail\": \"string\"\n}"
+								}
+							]
+						},
+						{
+							"name": "Удалить комнату",
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/rooms/{{room_id_1}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"rooms",
+										"{{room_id_1}}"
+									]
+								},
+								"description": "Удалить комнату (требуется аутентификация администратора)"
+							},
+							"response": [
+								{
+									"name": "Комната удалена",
+									"originalRequest": {
+										"method": "DELETE",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/rooms/:room_id",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"rooms",
+												":room_id"
+											],
+											"variable": [
+												{
+													"key": "room_id"
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n  \"message\": \"string\"\n}"
+								},
+								{
+									"name": "Комната не найдена",
+									"originalRequest": {
+										"method": "DELETE",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/rooms/:room_id",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"rooms",
+												":room_id"
+											],
+											"variable": [
+												{
+													"key": "room_id"
+												}
+											]
+										}
+									},
+									"status": "Not Found",
+									"code": 404,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n  \"detail\": \"string\"\n}"
+								},
+								{
+									"name": "Неавторизованный доступ",
+									"originalRequest": {
+										"method": "DELETE",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/rooms/:room_id",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"rooms",
+												":room_id"
+											],
+											"variable": [
+												{
+													"key": "room_id"
+												}
+											]
+										}
+									},
+									"status": "Forbidden",
+									"code": 403,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n  \"detail\": \"string\"\n}"
+								}
+							]
+						}
+					]
+				},
+				{
+					"name": "Получить список комнат",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/rooms?hotel_id=1&room_type=standard&min_price=50&max_price=200&page=1&size=10",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"rooms"
+							],
+							"query": [
+								{
+									"key": "hotel_id",
+									"value": "1"
+								},
+								{
+									"key": "room_type",
+									"value": "standard"
+								},
+								{
+									"key": "min_price",
+									"value": "50"
+								},
+								{
+									"key": "max_price",
+									"value": "200"
+								},
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								}
+							]
+						},
+						"description": "Получить список комнат с фильтрацией по отелю, типу комнаты, цене и пагинацией"
+					},
+					"response": [
+						{
+							"name": "Список комнат",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/rooms?hotel_id=1&room_type=standard&min_price=50&max_price=200&page=1&size=10",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"rooms"
+									],
+									"query": [
+										{
+											"key": "hotel_id",
+											"value": "1"
+										},
+										{
+											"key": "room_type",
+											"value": "standard"
+										},
+										{
+											"key": "min_price",
+											"value": "50"
+										},
+										{
+											"key": "max_price",
+											"value": "200"
+										},
+										{
+											"key": "page",
+											"value": "1"
+										},
+										{
+											"key": "size",
+											"value": "10"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "[\n  {\n    \"hotel_id\": 2014,\n    \"number\": \"string\",\n    \"price\": 0,\n    \"id\": 2014,\n    \"created_at\": \"1953-03-22T21:52:05.565Z\",\n    \"description\": \"string\",\n    \"capacity\": 0,\n    \"room_type\": \"string\"\n  },\n  {\n    \"hotel_id\": 2014,\n    \"number\": \"string\",\n    \"price\": 0,\n    \"id\": 2014,\n    \"created_at\": \"1953-03-22T21:52:05.565Z\",\n    \"description\": \"string\",\n    \"capacity\": 0,\n    \"room_type\": \"string\"\n  }\n]"
+						},
+						{
+							"name": "Ошибка при получении списка комнат",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/rooms?hotel_id=1&room_type=standard&min_price=50&max_price=200&page=1&size=10",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"rooms"
+									],
+									"query": [
+										{
+											"key": "hotel_id",
+											"value": "1"
+										},
+										{
+											"key": "room_type",
+											"value": "standard"
+										},
+										{
+											"key": "min_price",
+											"value": "50"
+										},
+										{
+											"key": "max_price",
+											"value": "200"
+										},
+										{
+											"key": "page",
+											"value": "1"
+										},
+										{
+											"key": "size",
+											"value": "10"
+										}
+									]
+								}
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"detail\": \"string\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Создать новую комнату",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"hotel_id\": 2014,\n  \"number\": \"string\",\n  \"description\": \"string\",\n  \"price\": 0,\n  \"capacity\": 0,\n  \"room_type\": \"string\"\n}",
+							"options": {
+								"raw": {
+									"headerFamily": "json",
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/rooms",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"rooms"
+							]
+						},
+						"description": "Создать новую комнату в отеле (требуется аутентификация администратора)"
+					},
+					"response": [
+						{
+							"name": "Комната создана",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"hotel_id\": 2014,\n  \"number\": \"string\",\n  \"description\": \"string\",\n  \"price\": 0,\n  \"capacity\": 0,\n  \"room_type\": \"string\"\n}",
+									"options": {
+										"raw": {
+											"headerFamily": "json",
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/rooms",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"rooms"
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"hotel_id\": 2014,\n  \"number\": \"string\",\n  \"price\": 0,\n  \"id\": 2014,\n  \"created_at\": \"1953-03-22T21:52:05.565Z\",\n  \"description\": \"string\",\n  \"capacity\": 0,\n  \"room_type\": \"string\"\n}"
+						},
+						{
+							"name": "Неавторизованный доступ",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"hotel_id\": 2014,\n  \"number\": \"string\",\n  \"description\": \"string\",\n  \"price\": 0,\n  \"capacity\": 0,\n  \"room_type\": \"string\"\n}",
+									"options": {
+										"raw": {
+											"headerFamily": "json",
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/rooms",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"rooms"
+									]
+								}
+							},
+							"status": "Forbidden",
+							"code": 403,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"detail\": \"string\"\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "bookings",
+			"item": [
+				{
+					"name": "{booking_id}",
+					"item": [
+						{
+							"name": "Получить бронирование по ID",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/bookings/{{booking_id_1}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"bookings",
+										"{{booking_id_1}}"
+									]
+								},
+								"description": "Получить подробную информацию о бронировании по его идентификатору"
+							},
+							"response": [
+								{
+									"name": "Информация о бронировании",
+									"originalRequest": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/bookings/:booking_id",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"bookings",
+												":booking_id"
+											],
+											"variable": [
+												{
+													"key": "booking_id"
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n  \"room_id\": 2014,\n  \"user_id\": 2014,\n  \"start_date\": \"1953-03-22\",\n  \"end_date\": \"1953-03-22\",\n  \"id\": 2014,\n  \"created_at\": \"1953-03-22T21:52:05.565Z\",\n  \"status\": \"string\",\n  \"total_price\": 0\n}"
+								},
+								{
+									"name": "Бронирование не найдено",
+									"originalRequest": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/bookings/:booking_id",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"bookings",
+												":booking_id"
+											],
+											"variable": [
+												{
+													"key": "booking_id"
+												}
+											]
+										}
+									},
+									"status": "Not Found",
+									"code": 404,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n  \"detail\": \"string\"\n}"
+								}
+							]
+						},
+						{
+							"name": "Обновить бронирование",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"start_date\": \"1953-03-22\",\n  \"end_date\": \"1953-03-22\",\n  \"status\": \"string\"\n}",
+									"options": {
+										"raw": {
+											"headerFamily": "json",
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/bookings/{{booking_id_1}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"bookings",
+										"{{booking_id_1}}"
+									]
+								},
+								"description": "Обновить информацию о бронировании (требуется аутентификация пользователя или администратора)"
+							},
+							"response": [
+								{
+									"name": "Бронирование обновлено",
+									"originalRequest": {
+										"method": "PUT",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "Accept",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"start_date\": \"1953-03-22\",\n  \"end_date\": \"1953-03-22\",\n  \"status\": \"string\"\n}",
+											"options": {
+												"raw": {
+													"headerFamily": "json",
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{baseUrl}}/bookings/:booking_id",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"bookings",
+												":booking_id"
+											],
+											"variable": [
+												{
+													"key": "booking_id"
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n  \"room_id\": 2014,\n  \"user_id\": 2014,\n  \"start_date\": \"1953-03-22\",\n  \"end_date\": \"1953-03-22\",\n  \"id\": 2014,\n  \"created_at\": \"1953-03-22T21:52:05.565Z\",\n  \"status\": \"string\",\n  \"total_price\": 0\n}"
+								},
+								{
+									"name": "Бронирование не найдено",
+									"originalRequest": {
+										"method": "PUT",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "Accept",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"start_date\": \"1953-03-22\",\n  \"end_date\": \"1953-03-22\",\n  \"status\": \"string\"\n}",
+											"options": {
+												"raw": {
+													"headerFamily": "json",
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{baseUrl}}/bookings/:booking_id",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"bookings",
+												":booking_id"
+											],
+											"variable": [
+												{
+													"key": "booking_id"
+												}
+											]
+										}
+									},
+									"status": "Not Found",
+									"code": 404,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n  \"detail\": \"string\"\n}"
+								},
+								{
+									"name": "Неавторизованный доступ",
+									"originalRequest": {
+										"method": "PUT",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "Accept",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"start_date\": \"1953-03-22\",\n  \"end_date\": \"1953-03-22\",\n  \"status\": \"string\"\n}",
+											"options": {
+												"raw": {
+													"headerFamily": "json",
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{baseUrl}}/bookings/:booking_id",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"bookings",
+												":booking_id"
+											],
+											"variable": [
+												{
+													"key": "booking_id"
+												}
+											]
+										}
+									},
+									"status": "Forbidden",
+									"code": 403,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n  \"detail\": \"string\"\n}"
+								}
+							]
+						},
+						{
+							"name": "Отменить бронирование",
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/bookings/{{booking_id_1}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"bookings",
+										"{{booking_id_1}}"
+									]
+								},
+								"description": "Отменить бронирование (требуется аутентификация пользователя или администратора)"
+							},
+							"response": [
+								{
+									"name": "Бронирование отменено",
+									"originalRequest": {
+										"method": "DELETE",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/bookings/:booking_id",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"bookings",
+												":booking_id"
+											],
+											"variable": [
+												{
+													"key": "booking_id"
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n  \"message\": \"string\"\n}"
+								},
+								{
+									"name": "Бронирование не найдено",
+									"originalRequest": {
+										"method": "DELETE",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/bookings/:booking_id",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"bookings",
+												":booking_id"
+											],
+											"variable": [
+												{
+													"key": "booking_id"
+												}
+											]
+										}
+									},
+									"status": "Not Found",
+									"code": 404,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n  \"detail\": \"string\"\n}"
+								},
+								{
+									"name": "Неавторизованный доступ",
+									"originalRequest": {
+										"method": "DELETE",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/bookings/:booking_id",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"bookings",
+												":booking_id"
+											],
+											"variable": [
+												{
+													"key": "booking_id"
+												}
+											]
+										}
+									},
+									"status": "Forbidden",
+									"code": 403,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n  \"detail\": \"string\"\n}"
+								}
+							]
+						}
+					]
+				},
+				{
+					"name": "Получить список бронирований",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/bookings?user_id=1&room_id=1&status=confirmed&page=1&size=10",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"bookings"
+							],
+							"query": [
+								{
+									"key": "user_id",
+									"value": "1"
+								},
+								{
+									"key": "room_id",
+									"value": "1"
+								},
+								{
+									"key": "status",
+									"value": "confirmed"
+								},
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								}
+							]
+						},
+						"description": "Получить список бронирований с фильтрацией по пользователю, комнате, статусу и пагинацией"
+					},
+					"response": [
+						{
+							"name": "Список бронирований",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/bookings?user_id=1&room_id=1&status=confirmed&page=1&size=10",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"bookings"
+									],
+									"query": [
+										{
+											"key": "user_id",
+											"value": "1"
+										},
+										{
+											"key": "room_id",
+											"value": "1"
+										},
+										{
+											"key": "status",
+											"value": "confirmed"
+										},
+										{
+											"key": "page",
+											"value": "1"
+										},
+										{
+											"key": "size",
+											"value": "10"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "[\n  {\n    \"room_id\": 2014,\n    \"user_id\": 2014,\n    \"start_date\": \"1953-03-22\",\n    \"end_date\": \"1953-03-22\",\n    \"id\": 2014,\n    \"created_at\": \"1953-03-22T21:52:05.565Z\",\n    \"status\": \"string\",\n    \"total_price\": 0\n  },\n  {\n    \"room_id\": 2014,\n    \"user_id\": 2014,\n    \"start_date\": \"1953-03-22\",\n    \"end_date\": \"1953-03-22\",\n    \"id\": 2014,\n    \"created_at\": \"1953-03-22T21:52:05.565Z\",\n    \"status\": \"string\",\n    \"total_price\": 0\n  }\n]"
+						},
+						{
+							"name": "Ошибка при получении списка бронирований",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/bookings?user_id=1&room_id=1&status=confirmed&page=1&size=10",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"bookings"
+									],
+									"query": [
+										{
+											"key": "user_id",
+											"value": "1"
+										},
+										{
+											"key": "room_id",
+											"value": "1"
+										},
+										{
+											"key": "status",
+											"value": "confirmed"
+										},
+										{
+											"key": "page",
+											"value": "1"
+										},
+										{
+											"key": "size",
+											"value": "10"
+										}
+									]
+								}
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"detail\": \"string\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Создать новое бронирование",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"room_id\": 2014,\n  \"user_id\": 2014,\n  \"start_date\": \"1953-03-22\",\n  \"end_date\": \"1953-03-22\"\n}",
+							"options": {
+								"raw": {
+									"headerFamily": "json",
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/bookings",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"bookings"
+							]
+						},
+						"description": "Создать новое бронирование комнаты (требуется аутентификация пользователя)"
+					},
+					"response": [
+						{
+							"name": "Бронирование создано",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"room_id\": 2014,\n  \"user_id\": 2014,\n  \"start_date\": \"1953-03-22\",\n  \"end_date\": \"1953-03-22\"\n}",
+									"options": {
+										"raw": {
+											"headerFamily": "json",
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/bookings",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"bookings"
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"room_id\": 2014,\n  \"user_id\": 2014,\n  \"start_date\": \"1953-03-22\",\n  \"end_date\": \"1953-03-22\",\n  \"id\": 2014,\n  \"created_at\": \"1953-03-22T21:52:05.565Z\",\n  \"status\": \"string\",\n  \"total_price\": 0\n}"
+						},
+						{
+							"name": "Неавторизованный доступ",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"room_id\": 2014,\n  \"user_id\": 2014,\n  \"start_date\": \"1953-03-22\",\n  \"end_date\": \"1953-03-22\"\n}",
+									"options": {
+										"raw": {
+											"headerFamily": "json",
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/bookings",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"bookings"
+									]
+								}
+							},
+							"status": "Forbidden",
+							"code": 403,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"detail\": \"string\"\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "users",
+			"item": [
+				{
+					"name": "{user_id}",
+					"item": [
+						{
+							"name": "Получить пользователя по ID",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/users/{{user_id_1}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"users",
+										"{{user_id_1}}"
+									]
+								},
+								"description": "Получить подробную информацию о пользователе по его идентификатору"
+							},
+							"response": [
+								{
+									"name": "Информация о пользователе",
+									"originalRequest": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/users/:user_id",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"users",
+												":user_id"
+											],
+											"variable": [
+												{
+													"key": "user_id"
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n  \"email\": \"JTmMh@WaXgZzXvwFoJjjG.ffv\",\n  \"username\": \"string\",\n  \"id\": 2014,\n  \"created_at\": \"1953-03-22T21:52:05.565Z\",\n  \"is_active\": true,\n  \"role\": \"string\"\n}"
+								},
+								{
+									"name": "Пользователь не найден",
+									"originalRequest": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/users/:user_id",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"users",
+												":user_id"
+											],
+											"variable": [
+												{
+													"key": "user_id"
+												}
+											]
+										}
+									},
+									"status": "Not Found",
+									"code": 404,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n  \"detail\": \"string\"\n}"
+								}
+							]
+						 },
+						{
+							"name": "Обновить информацию о пользователе",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"email\": \"JTmMh@WaXgZzXvwFoJjjG.ffv\",\n  \"username\": \"string\",\n  \"password\": \"string\"\n}",
+									"options": {
+										"raw": {
+											"headerFamily": "json",
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/users/{{user_id_1}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"users",
+										"{{user_id_1}}"
+									]
+								},
+								"description": "Обновить информацию о пользователе (требуется аутентификация пользователя или администратора)"
+							},
+							"response": [
+								{
+									"name": "Информация о пользователе обновлена",
+									"originalRequest": {
+										"method": "PUT",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "Accept",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"email\": \"JTmMh@WaXgZzXvwFoJjjG.ffv\",\n  \"username\": \"string\",\n  \"password\": \"string\"\n}",
+											"options": {
+												"raw": {
+													"headerFamily": "json",
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{baseUrl}}/users/:user_id",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"users",
+												":user_id"
+											],
+											"variable": [
+												{
+													"key": "user_id"
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n  \"email\": \"JTmMh@WaXgZzXvwFoJjjG.ffv\",\n  \"username\": \"string\",\n  \"id\": 2014,\n  \"created_at\": \"1953-03-22T21:52:05.565Z\",\n  \"is_active\": true,\n  \"role\": \"string\"\n}"
+								},
+								{
+									"name": "Пользователь не найден",
+									"originalRequest": {
+										"method": "PUT",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "Accept",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"email\": \"JTmMh@WaXgZzXvwFoJjjG.ffv\",\n  \"username\": \"string\",\n  \"password\": \"string\"\n}",
+											"options": {
+												"raw": {
+													"headerFamily": "json",
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{baseUrl}}/users/:user_id",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"users",
+												":user_id"
+											],
+											"variable": [
+												{
+													"key": "user_id"
+												}
+											]
+										}
+									},
+									"status": "Not Found",
+									"code": 404,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n  \"detail\": \"string\"\n}"
+								},
+								{
+									"name": "Неавторизованный доступ",
+									"originalRequest": {
+										"method": "PUT",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "Accept",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"email\": \"JTmMh@WaXgZzXvwFoJjjG.ffv\",\n  \"username\": \"string\",\n  \"password\": \"string\"\n}",
+											"options": {
+												"raw": {
+													"headerFamily": "json",
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{baseUrl}}/users/:user_id",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"users",
+												":user_id"
+											],
+											"variable": [
+												{
+													"key": "user_id"
+												}
+											]
+										}
+									},
+									"status": "Forbidden",
+									"code": 403,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n  \"detail\": \"string\"\n}"
+								}
+							]
+						},
+						{
+							"name": "Удалить пользователя",
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/users/{{user_id_1}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"users",
+										"{{user_id_1}}"
+									]
+								},
+								"description": "Удалить пользователя (требуется аутентификация администратора)"
+							},
+							"response": [
+								{
+									"name": "Пользователь удален",
+									"originalRequest": {
+										"method": "DELETE",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/users/:user_id",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"users",
+												":user_id"
+											],
+											"variable": [
+												{
+													"key": "user_id"
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n  \"message\": \"string\"\n}"
+								},
+								{
+									"name": "Пользователь не найден",
+									"originalRequest": {
+										"method": "DELETE",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/users/:user_id",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"users",
+												":user_id"
+											],
+											"variable": [
+												{
+													"key": "user_id"
+												}
+											]
+										}
+									},
+									"status": "Not Found",
+									"code": 404,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n  \"detail\": \"string\"\n}"
+								},
+								{
+									"name": "Неавторизованный доступ",
+									"originalRequest": {
+										"method": "DELETE",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/users/:user_id",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"users",
+												":user_id"
+											],
+											"variable": [
+												{
+													"key": "user_id"
+												}
+											]
+										}
+									},
+									"status": "Forbidden",
+									"code": 403,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n  \"detail\": \"string\"\n}"
+								}
+							]
+						}
+					]
+				},
+				{
+					"name": "Получить список пользователей",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/users?page=1&size=10",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								}
+							]
+						},
+						"description": "Получить список пользователей с пагинацией (требуется аутентификация администратора)"
+					},
+					"response": [
+						{
+							"name": "Список пользователей",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/users?page=1&size=10",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"users"
+									],
+									"query": [
+										{
+											"key": "page",
+											"value": "1"
+										},
+										{
+											"key": "size",
+											"value": "10"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "[\n  {\n    \"email\": \"JTmMh@WaXgZzXvwFoJjjG.ffv\",\n    \"username\": \"string\",\n    \"id\": 2014,\n    \"created_at\": \"1953-03-22T21:52:05.565Z\",\n    \"is_active\": true,\n    \"role\": \"string\"\n  },\n  {\n    \"email\": \"JTmMh@WaXgZzXvwFoJjjG.ffv\",\n    \"username\": \"string\",\n    \"id\": 2014,\n    \"created_at\": \"1953-03-22T21:52:05.565Z\",\n    \"is_active\": true,\n    \"role\": \"string\"\n  }\n]"
+						},
+						{
+							"name": "Неавторизованный доступ",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/users?page=1&size=10",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"users"
+									],
+									"query": [
+										{
+											"key": "page",
+											"value": "1"
+										},
+										{
+											"key": "size",
+											"value": "10"
+										}
+									]
+								}
+							},
+							"status": "Forbidden",
+							"code": 403,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"detail\": \"string\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Создать нового пользователя",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"JTmMh@WaXgZzXvwFoJjjG.ffv\",\n  \"username\": \"string\",\n  \"password\": \"string\"\n}",
+							"options": {
+								"raw": {
+									"headerFamily": "json",
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/users",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users"
+							]
+						},
+						"description": "Создать нового пользователя (регистрация)"
+					},
+					"response": [
+						{
+							"name": "Пользователь создан",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"email\": \"JTmMh@WaXgZzXvwFoJjjG.ffv\",\n  \"username\": \"string\",\n  \"password\": \"string\"\n}",
+									"options": {
+										"raw": {
+											"headerFamily": "json",
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/users",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"users"
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"email\": \"JTmMh@WaXgZzXvwFoJjjG.ffv\",\n  \"username\": \"string\",\n  \"id\": 2014,\n  \"created_at\": \"1953-03-22T21:52:05.565Z\",\n  \"is_active\": true,\n  \"role\": \"string\"\n}"
+						},
+						{
+							"name": "Ошибка при создании пользователя",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"email\": \"JTmMh@WaXgZzXvwFoJjjG.ffv\",\n  \"username\": \"string\",\n  \"password\": \"string\"\n}",
+									"options": {
+										"raw": {
+											"headerFamily": "json",
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/users",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"users"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"detail\": \"string\"\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "auth",
+			"item": [
+				{
+					"name": "login",
+					"item": [
+						{
+							"name": "Аутентификация пользователя",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"username\": \"string\",\n  \"password\": \"string\"\n}",
+									"options": {
+										"raw": {
+											"headerFamily": "json",
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/auth/login",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"auth",
+										"login"
+									]
+								},
+								"description": "Аутентификация пользователя и получение JWT токена"
+							},
+							"response": [
+								{
+									"name": "Успешная аутентификация",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "Accept",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"username\": \"string\",\n  \"password\": \"string\"\n}",
+											"options": {
+												"raw": {
+													"headerFamily": "json",
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{baseUrl}}/auth/login",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"auth",
+												"login"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n  \"access_token\": \"string\",\n  \"token_type\": \"string\"\n}"
+								},
+								{
+									"name": "Неверные учетные данные",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "Accept",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"username\": \"string\",\n  \"password\": \"string\"\n}",
+											"options": {
+												"raw": {
+													"headerFamily": "json",
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{baseUrl}}/auth/login",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"auth",
+												"login"
+											]
+										}
+									},
+									"status": "Unauthorized",
+									"code": 401,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n  \"detail\": \"string\"\n}"
+								}
+							]
+						}
+					]
+				},
+				{
+					"name": "register",
+					"item": [
+						{
+							"name": "Регистрация нового пользователя",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"email\": \"JTmMh@WaXgZzXvwFoJjjG.ffv\",\n  \"username\": \"string\",\n  \"password\": \"string\"\n}",
+									"options": {
+										"raw": {
+											"headerFamily": "json",
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/auth/register",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"auth",
+										"register"
+									]
+								},
+								"description": "Регистрация нового пользователя в системе"
+							},
+							"response": [
+								{
+									"name": "Пользователь успешно зарегистрирован",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "Accept",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"email\": \"JTmMh@WaXgZzXvwFoJjjG.ffv\",\n  \"username\": \"string\",\n  \"password\": \"string\"\n}",
+											"options": {
+												"raw": {
+													"headerFamily": "json",
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{baseUrl}}/auth/register",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"auth",
+												"register"
+											]
+										}
+									},
+									"status": "Created",
+									"code": 201,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n  \"email\": \"JTmMh@WaXgZzXvwFoJjjG.ffv\",\n  \"username\": \"string\",\n  \"id\": 2014,\n  \"created_at\": \"1953-03-22T21:52:05.565Z\",\n  \"is_active\": true,\n  \"role\": \"string\"\n}"
+								},
+								{
+									"name": "Ошибка при регистрации",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "Accept",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"email\": \"JTmMh@WaXgZzXvwFoJjjG.ffv\",\n  \"username\": \"string\",\n  \"password\": \"string\"\n}",
+											"options": {
+												"raw": {
+													"headerFamily": "json",
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{baseUrl}}/auth/register",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"auth",
+												"register"
+											]
+										}
+									},
+									"status": "Bad Request",
+									"code": 400,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n  \"detail\": \"string\"\n}"
+								}
+							]
+						}
+					]
+				},
+				{
+					"name": "me",
+					"item": [
+						{
+							"name": "Получить информацию о текущем пользователе",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/auth/me",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"auth",
+										"me"
+									]
+								},
+								"description": "Получить информацию о текущем аутентифицированном пользователе"
+							},
+							"response": [
+								{
+									"name": "Информация о текущем пользователе",
+									"originalRequest": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{access_token}}"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/auth/me",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"auth",
+												"me"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n  \"email\": \"JTmMh@WaXgZzXvwFoJjjG.ffv\",\n  \"username\": \"string\",\n  \"id\": 2014,\n  \"created_at\": \"1953-03-22T21:52:05.565Z\",\n  \"is_active\": true,\n  \"role\": \"string\"\n}"
+								},
+								{
+									"name": "Неавторизованный доступ",
+									"originalRequest": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{access_token}}"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/auth/me",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"auth",
+												"me"
+											]
+										}
+									},
+									"status": "Unauthorized",
+									"code": 401,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n  \"detail\": \"string\"\n}"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8000"
+		},
+		{
+			"key": "hotel_id_1",
+			"value": "1"
+		},
+		{
+			"key": "room_id_1",
+			"value": "1"
+		},
+		{
+			"key": "booking_id_1",
+			"value": "1"
+		},
+		{
+			"key": "user_id_1",
+			"value": "1"
+		},
+		{
+			"key": "access_token",
+			"value": "your_jwt_token_here"
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}
