@@ -130,31 +130,96 @@ async def update_hotel(
     
     return db_hotel
 
+# @router.delete("/{hotel_id}", response_model=schemas.MessageResponse)
+# def delete_hotel(hotel_id: int, db: Session = Depends(get_db)):
+#     """Удалить отель (активные бронирования становятся неактивными)"""
+#     try:
+#         db_hotel = db.query(models.Hotel).filter(models.Hotel.id == hotel_id).first()
+#         if not db_hotel:
+#             raise HTTPException(status_code=404, detail="Отель не найден")
+        
+#         direct_bookings = db.query(models.Booking).filter(
+#             models.Booking.hotel_id == hotel_id
+#         ).all()
+        
+#         room_bookings = db.query(models.Booking).filter(
+#             models.Booking.room_id.in_(
+#                 db.query(models.Room.id).filter(models.Room.hotel_id == hotel_id)
+#             )
+#         ).all()
+        
+#         all_bookings = direct_bookings + room_bookings
+        
+#         active_bookings_updated = 0
+#         cancelled_bookings = []
+        
+#         for booking in all_bookings:
+#             if booking.status in ["confirmed", "checked_in"]:
+#                 cancelled_bookings.append({
+#                     "id": booking.id,
+#                     "user_id": booking.user_id,
+#                     "room_id": booking.room_id,
+#                     "original_status": booking.status,
+#                     "check_in_date": booking.check_in_date,
+#                     "check_out_date": booking.check_out_date
+#                 })
+                
+#                 booking.status = "cancelled"
+#                 booking.cancellation_reason = "Отель удален из системы"
+#                 booking.cancelled_at = db.func.now()
+#                 active_bookings_updated += 1
+        
+#         print(f"Marked {active_bookings_updated} active bookings as cancelled for hotel {hotel_id}")
+        
+#         rooms_updated = db.query(models.Room).filter(
+#             models.Room.hotel_id == hotel_id
+#         ).update({
+#             "status": "inactive",
+#             "is_active": False
+#         })
+        
+#         print(f"Marked {rooms_updated} rooms as inactive for hotel {hotel_id}")
+        
+#         hotel_name = db_hotel.name
+#         db.delete(db_hotel)
+#         db.commit()
+        
+#         try:
+#             cache_service = CacheService()
+#             cache_service.invalidate_hotel_cache(hotel_id)
+#         except Exception as cache_error:
+#             print(f"Cache error: {cache_error}")
+        
+#         return {
+#             "message": f"Отель '{hotel_name}' успешно удален",
+#             "hotel_id": hotel_id,
+#             "inactive_rooms": rooms_updated,
+#             "cancelled_bookings": active_bookings_updated,
+#             "cancellation_details": cancelled_bookings
+#         }
+        
+#     except Exception as e:
+#         db.rollback()
+#         print(f"Error deleting hotel {hotel_id}: {str(e)}")
+#         raise HTTPException(status_code=500, detail="Ошибка при удалении отеля")
+
 @router.delete("/{hotel_id}", response_model=schemas.MessageResponse)
-def delete_hotel(hotel_id: int, db: Session = Depends(get_db)):
+async def delete_hotel(hotel_id: int, db: Session = Depends(get_db)):
     """Удалить отель (активные бронирования становятся неактивными)"""
     try:
         db_hotel = db.query(models.Hotel).filter(models.Hotel.id == hotel_id).first()
         if not db_hotel:
             raise HTTPException(status_code=404, detail="Отель не найден")
         
-        direct_bookings = db.query(models.Booking).filter(
+        all_bookings = db.query(models.Booking).filter(
             models.Booking.hotel_id == hotel_id
         ).all()
-        
-        room_bookings = db.query(models.Booking).filter(
-            models.Booking.room_id.in_(
-                db.query(models.Room.id).filter(models.Room.hotel_id == hotel_id)
-            )
-        ).all()
-        
-        all_bookings = direct_bookings + room_bookings
         
         active_bookings_updated = 0
         cancelled_bookings = []
         
         for booking in all_bookings:
-            if booking.status in ["confirmed", "checked_in"]:
+            if booking.status in [models.BookingStatus.CONFIRMED, models.BookingStatus.CHECKED_IN]:
                 cancelled_bookings.append({
                     "id": booking.id,
                     "user_id": booking.user_id,
@@ -164,19 +229,16 @@ def delete_hotel(hotel_id: int, db: Session = Depends(get_db)):
                     "check_out_date": booking.check_out_date
                 })
                 
-                booking.status = "cancelled"
-                booking.cancellation_reason = "Отель удален из системы"
-                booking.cancelled_at = db.func.now()
+                booking.status = models.BookingStatus.CANCELLED
                 active_bookings_updated += 1
         
         print(f"Marked {active_bookings_updated} active bookings as cancelled for hotel {hotel_id}")
         
-        rooms_updated = db.query(models.Room).filter(
-            models.Room.hotel_id == hotel_id
-        ).update({
-            "status": "inactive",
-            "is_active": False
-        })
+        rooms_updated = 0
+        rooms = db.query(models.Room).filter(models.Room.hotel_id == hotel_id).all()
+        for room in rooms:
+            room.status = models.RoomStatus.MAINTENANCE 
+            rooms_updated += 1
         
         print(f"Marked {rooms_updated} rooms as inactive for hotel {hotel_id}")
         
@@ -186,7 +248,7 @@ def delete_hotel(hotel_id: int, db: Session = Depends(get_db)):
         
         try:
             cache_service = CacheService()
-            cache_service.invalidate_hotel_cache(hotel_id)
+            await cache_service.invalidate_hotel_cache(hotel_id)
         except Exception as cache_error:
             print(f"Cache error: {cache_error}")
         
@@ -201,4 +263,6 @@ def delete_hotel(hotel_id: int, db: Session = Depends(get_db)):
     except Exception as e:
         db.rollback()
         print(f"Error deleting hotel {hotel_id}: {str(e)}")
-        raise HTTPException(status_code=500, detail="Ошибка при удалении отеля")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Ошибка при удалении отеля: {str(e)}")

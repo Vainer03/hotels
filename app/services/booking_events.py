@@ -21,8 +21,8 @@ class BookingEventService:
             user_id=booking_data["user_id"],
             hotel_id=booking_data["hotel_id"],
             room_id=booking_data["room_id"],
-            check_in_date=booking_data["check_in_date"],
-            check_out_date=booking_data["check_out_date"],
+            check_in_date=booking_data["check_in_date"].isoformat(),
+            check_out_date=booking_data["check_out_date"].isoformat(),
             total_price=booking_data["total_price"],
             metadata={
                 "booking_reference": booking_data.get("booking_reference"),

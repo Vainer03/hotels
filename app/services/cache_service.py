@@ -48,18 +48,37 @@ class CacheService:
         
         return await manager.get_key(key)
     
-    async def cache_user_bookings(self, user_id: int, bookings_data: List[Dict[str, Any]], expire: int = 1800):
-        """Кэшировать бронирования пользователя"""
-        manager = await self._get_manager()
-        key = f"user_bookings:{user_id}"
-        await manager.set_key(key, bookings_data, expire)
-        logger.info(f"User {user_id} bookings cached")
+    # async def cache_user_bookings(self, user_id: int, bookings_data: List[Dict[str, Any]], expire: int = 1800):
+    #     """Кэшировать бронирования пользователя"""
+    #     manager = await self._get_manager()
+    #     key = f"user_bookings:{user_id}"
+    #     await manager.set_key(key, bookings_data, expire)
+    #     logger.info(f"User {user_id} bookings cached")
     
-    async def get_cached_user_bookings(self, user_id: int) -> Optional[List[Dict[str, Any]]]:
+    # async def get_cached_user_bookings(self, user_id: int) -> Optional[List[Dict[str, Any]]]:
+    #     """Получить кэшированные бронирования пользователя"""
+    #     manager = await self._get_manager()
+    #     key = f"user_bookings:{user_id}"
+    #     return await manager.get_key(key)
+
+    async def cache_user_bookings(self, user_id: int, bookings_data: List[dict]):
+        """Кэшировать бронирования пользователя"""
+        try:
+            manager = await self._get_manager()
+            cache_key = f"user_bookings:{user_id}"
+            await manager.set_key(cache_key, bookings_data, expire=300)
+        except Exception as e:
+            print(f"Cache error in cache_user_bookings: {e}")
+
+    async def get_cached_user_bookings(self, user_id: int) -> Optional[List[dict]]:
         """Получить кэшированные бронирования пользователя"""
-        manager = await self._get_manager()
-        key = f"user_bookings:{user_id}"
-        return await manager.get_key(key)
+        try:
+            manager = await self._get_manager()
+            cache_key = f"user_bookings:{user_id}"
+            return await manager.get_key(cache_key)
+        except Exception as e:
+            print(f"Cache error in get_cached_user_bookings: {e}")
+            return None
     
     async def cache_booking_details(self, booking_id: int, booking_data: Dict[str, Any], expire: int = 3600):
         """Кэшировать детали бронирования"""

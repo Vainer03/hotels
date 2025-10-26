@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from typing import List
 
 import app.models.hotels as models
@@ -123,7 +123,31 @@ async def get_bookings(
     db: Session = Depends(get_db)
 ):
     """Получить список всех бронирований"""
-    return db.query(models.Booking).offset(skip).limit(limit).all()
+    bookings = db.query(models.Booking).offset(skip).limit(limit).all()
+    
+    result = []
+    for booking in bookings:
+        try:
+            if booking.room is None:
+                print(f"Warning: Booking {booking.id} has no room assigned")
+                continue
+                
+            if booking.user is None:
+                print(f"Warning: Booking {booking.id} has no user assigned")
+                continue
+                
+            if booking.hotel is None:
+                print(f"Warning: Booking {booking.id} has no hotel assigned")
+                continue
+                
+            booking_data = schemas.BookingWithDetailsRead.model_validate(booking)
+            result.append(booking_data)
+            
+        except Exception as e:
+            print(f"Error processing booking {booking.id}: {e}")
+            continue
+    
+    return result
 
 @router.get("/{booking_id}", response_model=schemas.BookingWithDetailsRead)
 async def get_booking(booking_id: int, db: Session = Depends(get_db)):
@@ -156,14 +180,34 @@ async def get_user_bookings(user_id: int, db: Session = Depends(get_db)):
     user = db.query(models.User).filter(models.User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="Пользователь не найден")
+
+    bookings = db.query(models.Booking)\
+        .filter(models.Booking.user_id == user_id)\
+        .options(
+            joinedload(models.Booking.user),
+            joinedload(models.Booking.hotel),
+            joinedload(models.Booking.room)
+        )\
+        .all()
     
-    bookings = user.bookings
+    result = []
+    for booking in bookings:
+        try:
+            if booking.room is None or booking.hotel is None:
+                print(f"Warning: Booking {booking.id} is missing required relations")
+                continue
+                
+            booking_data = schemas.BookingWithDetailsRead.model_validate(booking)
+            result.append(booking_data)
+            
+        except Exception as e:
+            print(f"Error processing booking {booking.id}: {e}")
+            continue
     
-    bookings_data = [schemas.BookingWithDetailsRead.model_validate(booking).model_dump() for booking in bookings]
+    if result:
+        await cache_service.cache_user_bookings(user_id, [booking.model_dump() for booking in result])
     
-    await cache_service.cache_user_bookings(user_id, bookings_data)
-    
-    return bookings
+    return result
 
 @router.put("/{booking_id}", response_model=schemas.BookingRead)
 async def update_booking(
