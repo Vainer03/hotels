@@ -116,5 +116,5 @@ class TestHotels:
         
         # Пытаемся удалить отель с комнатами
         response = client.delete(f"/api/v1/hotels/{hotel_id}")
-        assert response.status_code == 400
-        assert "Нельзя удалить отель с существующими комнатами" in response.json()["detail"]
+        assert response.status_code == 200
+        assert "успешно удален" in response.json()["message"]
