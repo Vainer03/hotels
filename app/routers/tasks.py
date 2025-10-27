@@ -30,10 +30,11 @@ async def init_mock_data():
             db.query(Hotel).delete()
             db.query(User).delete()
             
+            # Отели
             hotels_data = [
                 {
                     "name": "Grand Hotel Moscow",
-                    "description": "Роскошный отель в центре Москвы",
+                    "description": "Роскошный отель в центре Москвы с видом на Кремль",
                     "address": "ул. Тверская, 1",
                     "city": "Москва",
                     "country": "Россия",
@@ -41,7 +42,7 @@ async def init_mock_data():
                 },
                 {
                     "name": "St. Petersburg Imperial", 
-                    "description": "Элегантный отель в Санкт-Петербурге",
+                    "description": "Элегантный отель в историческом центре Санкт-Петербурга",
                     "address": "Невский пр-т, 25",
                     "city": "Санкт-Петербург",
                     "country": "Россия", 
@@ -49,11 +50,51 @@ async def init_mock_data():
                 },
                 {
                     "name": "Sochi Sunrise Resort",
-                    "description": "Курортный комплекс в Сочи",
+                    "description": "Курортный комплекс в Сочи с собственным пляжем",
                     "address": "ул. Приморская, 45", 
                     "city": "Сочи",
                     "country": "Россия",
                     "rating": 4.4
+                },
+                {
+                    "name": "Kazan Palace",
+                    "description": "Современный отель в центре Казани рядом с Кремлем",
+                    "address": "ул. Баумана, 15",
+                    "city": "Казань",
+                    "country": "Россия",
+                    "rating": 4.5
+                },
+                {
+                    "name": "Golden Ring Hotel",
+                    "description": "Уютный отель в историческом центре Ярославля",
+                    "address": "ул. Кирова, 8",
+                    "city": "Ярославль",
+                    "country": "Россия",
+                    "rating": 4.3
+                },
+                {
+                    "name": "Ural Mountains Resort",
+                    "description": "Горнолыжный курорт в предгорьях Урала",
+                    "address": "ул. Горная, 12",
+                    "city": "Екатеринбург",
+                    "country": "Россия",
+                    "rating": 4.2
+                },
+                {
+                    "name": "Volga River View",
+                    "description": "Отель с панорамным видом на Волгу в Нижнем Новгороде",
+                    "address": "наб. Верхне-Волжская, 10",
+                    "city": "Нижний Новгород",
+                    "country": "Россия",
+                    "rating": 4.4
+                },
+                {
+                    "name": "Siberian Taiga Lodge",
+                    "description": "Эко-отель в сибирской тайге с банным комплексом",
+                    "address": "ул. Лесная, 5",
+                    "city": "Новосибирск",
+                    "country": "Россия",
+                    "rating": 4.1
                 }
             ]
             
@@ -65,32 +106,46 @@ async def init_mock_data():
             
             db.flush()
             
+            # Комнаты
             rooms = []
-            room_types = ["Standard", "Deluxe", "Suite"]
-            room_prices = [2500, 4000, 6000]  
+            room_types = ["Standard", "Deluxe", "Suite", "Family", "Business", "Presidential"]
+            room_prices = [2500, 4000, 6000, 5000, 7000, 12000]
+            capacities = [2, 3, 4, 5, 2, 6]
             
             for hotel_index, hotel in enumerate(hotels):
-                for i in range(5): 
-                    room_type = room_types[i % 3]  
-                    room = Room(
-                        hotel_id=hotel.id,
-                        room_number=f"10{i+1}",
-                        floor=1 + (i // 3),  
-                        room_type=room_type,
-                        description=f"{room_type} номер в отеле {hotel.name}",
-                        price_per_night=room_prices[i % 3],
-                        capacity=2 if room_type == "Standard" else (3 if room_type == "Deluxe" else 4),
-                        amenities="WiFi, TV, Кондиционер",
-                        status="available"
-                    )
-                    db.add(room)
-                    rooms.append(room)
+                for floor in range(1, 6):  # 5 этажей
+                    for room_num in range(1, 11):  # 10 комнат на этаже
+                        room_index = (floor + room_num) % len(room_types)
+                        room_type = room_types[room_index]
+                        
+                        room = Room(
+                            hotel_id=hotel.id,
+                            room_number=f"{floor}{room_num:02d}",
+                            floor=floor,
+                            room_type=room_type,
+                            description=f"{room_type} номер в отеле {hotel.name}. {get_room_description(room_type, hotel.city)}",
+                            price_per_night=room_prices[room_index],
+                            capacity=capacities[room_index],
+                            amenities=get_room_amenities(room_type),
+                            status="available"
+                        )
+                        db.add(room)
+                        rooms.append(room)
+            
             db.flush()
 
+            # Пользователи
             users_data = [
                 {"email": "ivan.petrov@example.com", "first_name": "Иван", "last_name": "Петров", "phone": "+79991234567"},
                 {"email": "maria.ivanova@example.com", "first_name": "Мария", "last_name": "Иванова", "phone": "+79992345678"},
-                {"email": "alex.smirnov@example.com", "first_name": "Алексей", "last_name": "Смирнов", "phone": "+79993456789"}
+                {"email": "alex.smirnov@example.com", "first_name": "Алексей", "last_name": "Смирнов", "phone": "+79993456789"},
+                {"email": "olga.sidorova@example.com", "first_name": "Ольга", "last_name": "Сидорова", "phone": "+79994567890"},
+                {"email": "dmitry.kuznetsov@example.com", "first_name": "Дмитрий", "last_name": "Кузнецов", "phone": "+79995678901"},
+                {"email": "ekaterina.popova@example.com", "first_name": "Екатерина", "last_name": "Попова", "phone": "+79996789012"},
+                {"email": "sergey.volkov@example.com", "first_name": "Сергей", "last_name": "Волков", "phone": "+79997890123"},
+                {"email": "natalia.fedorova@example.com", "first_name": "Наталия", "last_name": "Федорова", "phone": "+79998901234"},
+                {"email": "andrey.morozov@example.com", "first_name": "Андрей", "last_name": "Морозов", "phone": "+79999012345"},
+                {"email": "tatyana.nikitina@example.com", "first_name": "Татьяна", "last_name": "Никитина", "phone": "+79990123456"}
             ]
             
             users = []
@@ -101,8 +156,9 @@ async def init_mock_data():
 
             db.flush()
 
-            
+            # Бронирования
             bookings_data = [
+                # Текущие бронирования
                 {
                     "user_id": users[0].id,
                     "room_id": rooms[0].id, 
@@ -126,6 +182,7 @@ async def init_mock_data():
                     "special_requests": "Отмечаем годовщину свадьбы"
                 },
                 
+                # Активные бронирования
                 {
                     "user_id": users[1].id,
                     "room_id": rooms[5].id, 
@@ -138,6 +195,19 @@ async def init_mock_data():
                     "special_requests": "Требуется трансфер из аэропорта"
                 },
                 {
+                    "user_id": users[2].id,
+                    "room_id": rooms[10].id,  
+                    "hotel_id": hotels[2].id,
+                    "check_in_date": datetime.now() + timedelta(days=14),
+                    "check_out_date": datetime.now() + timedelta(days=21),
+                    "number_of_guests": 2,
+                    "total_price": 17500,  
+                    "status": "confirmed",
+                    "special_requests": "Хочу номер с видом на море"
+                },
+                
+                # Завершенные бронирования
+                {
                     "user_id": users[1].id,
                     "room_id": rooms[8].id,  
                     "hotel_id": hotels[1].id,
@@ -148,18 +218,108 @@ async def init_mock_data():
                     "status": "completed",
                     "special_requests": None
                 },
+                {
+                    "user_id": users[3].id,
+                    "room_id": rooms[15].id,
+                    "hotel_id": hotels[3].id,
+                    "check_in_date": datetime.now() - timedelta(days=20),
+                    "check_out_date": datetime.now() - timedelta(days=15),
+                    "number_of_guests": 4,
+                    "total_price": 20000,
+                    "status": "completed",
+                    "special_requests": "С детской кроваткой"
+                },
                 
+                # Отмененные бронирования
+                {
+                    "user_id": users[4].id,
+                    "room_id": rooms[20].id,
+                    "hotel_id": hotels[4].id,
+                    "check_in_date": datetime.now() + timedelta(days=5),
+                    "check_out_date": datetime.now() + timedelta(days=8),
+                    "number_of_guests": 2,
+                    "total_price": 9000,
+                    "status": "cancelled",
+                    "special_requests": None
+                },
                 
+                # Дополнительные бронирования
+                {
+                    "user_id": users[5].id,
+                    "room_id": rooms[25].id,
+                    "hotel_id": hotels[5].id,
+                    "check_in_date": datetime.now() + timedelta(days=12),
+                    "check_out_date": datetime.now() + timedelta(days=15),
+                    "number_of_guests": 3,
+                    "total_price": 13500,
+                    "status": "confirmed",
+                    "special_requests": "Нужен завтрак в номер"
+                },
+                {
+                    "user_id": users[6].id,
+                    "room_id": rooms[30].id,
+                    "hotel_id": hotels[6].id,
+                    "check_in_date": datetime.now() + timedelta(days=25),
+                    "check_out_date": datetime.now() + timedelta(days=28),
+                    "number_of_guests": 2,
+                    "total_price": 12000,
+                    "status": "confirmed",
+                    "special_requests": "Деловая поездка"
+                },
+                {
+                    "user_id": users[7].id,
+                    "room_id": rooms[35].id,
+                    "hotel_id": hotels[7].id,
+                    "check_in_date": datetime.now() + timedelta(days=40),
+                    "check_out_date": datetime.now() + timedelta(days=45),
+                    "number_of_guests": 6,
+                    "total_price": 60000,
+                    "status": "confirmed",
+                    "special_requests": "Семейный отдых с детьми"
+                },
+                {
+                    "user_id": users[8].id,
+                    "room_id": rooms[40].id,
+                    "hotel_id": hotels[0].id,
+                    "check_in_date": datetime.now() + timedelta(days=18),
+                    "check_out_date": datetime.now() + timedelta(days=22),
+                    "number_of_guests": 2,
+                    "total_price": 16000,
+                    "status": "confirmed",
+                    "special_requests": "Романтический уикенд"
+                },
+                {
+                    "user_id": users[9].id,
+                    "room_id": rooms[45].id,
+                    "hotel_id": hotels[1].id,
+                    "check_in_date": datetime.now() + timedelta(days=8),
+                    "check_out_date": datetime.now() + timedelta(days=11),
+                    "number_of_guests": 1,
+                    "total_price": 12000,
+                    "status": "confirmed",
+                    "special_requests": "Командировка"
+                },
                 {
                     "user_id": users[2].id,
-                    "room_id": rooms[10].id,  
+                    "room_id": rooms[50].id,
                     "hotel_id": hotels[2].id,
-                    "check_in_date": datetime.now() + timedelta(days=14),
-                    "check_out_date": datetime.now() + timedelta(days=21),
-                    "number_of_guests": 2,
-                    "total_price": 17500,  
+                    "check_in_date": datetime.now() + timedelta(days=35),
+                    "check_out_date": datetime.now() + timedelta(days=42),
+                    "number_of_guests": 4,
+                    "total_price": 28000,
                     "status": "confirmed",
-                    "special_requests": "Хочу номер с видом на море"
+                    "special_requests": "Отдых с семьей"
+                },
+                {
+                    "user_id": users[4].id,
+                    "room_id": rooms[55].id,
+                    "hotel_id": hotels[3].id,
+                    "check_in_date": datetime.now() + timedelta(days=22),
+                    "check_out_date": datetime.now() + timedelta(days=25),
+                    "number_of_guests": 2,
+                    "total_price": 15000,
+                    "status": "confirmed",
+                    "special_requests": "Экскурсия по городу"
                 }
             ]
             
@@ -174,7 +334,7 @@ async def init_mock_data():
             
             db.commit()
             
-            return {"message": "Моковые данные успешно созданы! Перезагрузите страницу."}
+            return {"message": f"Моковые данные успешно созданы! Создано: {len(hotels)} отелей, {len(rooms)} комнат, {len(users)} пользователей, {len(bookings_data)} бронирований. Перезагрузите страницу."}
             
         except Exception as e:
             db.rollback()
@@ -184,8 +344,35 @@ async def init_mock_data():
             
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Ошибка при создании моковых данных: {str(e)}")
-    
 
+def get_room_description(room_type: str, city: str) -> str:
+    """Генерирует описание комнаты в зависимости от типа и города"""
+    descriptions = {
+        "Standard": f"Комфортабельный стандартный номер в {city}",
+        "Deluxe": f"Просторный улучшенный номер в {city} с дополнительными удобствами",
+        "Suite": f"Роскошный люкс в {city} с гостиной зоной",
+        "Family": f"Семейный номер в {city} идеально подходящий для отдыха с детьми",
+        "Business": f"Бизнес-номер в {city} с рабочим столом и улучшенным Wi-Fi",
+        "Presidential": f"Президентский люкс в {city} с панорамным видом"
+    }
+    return descriptions.get(room_type, f"Комфортабельный номер в {city}")
+
+def get_room_amenities(room_type: str) -> str:
+    """Возвращает список удобств в зависимости от типа комнаты"""
+    base_amenities = "WiFi, TV, Кондиционер, Сейф"
+    
+    amenities_by_type = {
+        "Standard": f"{base_amenities}, Фен, Чайник",
+        "Deluxe": f"{base_amenities}, Мини-бар, Халаты, Тапочки",
+        "Suite": f"{base_amenities}, Гостиная зона, Мини-кухня, Джакузи",
+        "Family": f"{base_amenities}, Детская кроватка, Игровая зона",
+        "Business": f"{base_amenities}, Рабочий стол, Принтер, Кофемашина",
+        "Presidential": f"{base_amenities}, Отдельная гостиная, Столовая, Личный дворецкий"
+    }
+    
+    return amenities_by_type.get(room_type, base_amenities)
+
+# Остальные функции остаются без изменений
 @router.post("/send-booking-confirmation", response_model=schemas.TaskResponse)
 async def send_booking_confirmation_task(
     task_data: schemas.EmailTaskData,

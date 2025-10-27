@@ -5,6 +5,7 @@ class RoomStatus(str, enum.Enum):
     OCCUPIED = "occupied" 
     MAINTENANCE = "maintenance"
     CLEANING = "cleaning"
+    INACTIVE = "inactive"
 
 class BookingStatus(str, enum.Enum):
     CONFIRMED = "confirmed"

@@ -306,3 +306,34 @@ async def check_out_booking(booking_id: int, db: Session = Depends(get_db)):
     await cache_service.invalidate_hotel_cache(booking.hotel_id)
     
     return {"message": "Выезд успешно зарегистрирован"}
+
+@router.delete("/{booking_id}", response_model=schemas.MessageResponse)
+async def delete_booking(booking_id: int, db: Session = Depends(get_db)):
+    """Удалить бронирование"""
+    try:
+        booking = db.query(models.Booking).filter(models.Booking.id == booking_id).first()
+        if not booking:
+            raise HTTPException(status_code=404, detail="Бронирование не найдено")
+        
+        if booking.status in ["confirmed", "checked_in"]:
+            room = booking.room
+            if room:
+                room.status = "available"
+        
+        db.delete(booking)
+        db.commit()
+        
+        try:
+            cache_service = CacheService()
+            await cache_service.invalidate_booking_cache(booking_id)
+            await cache_service.invalidate_user_cache(booking.user_id)
+            await cache_service.invalidate_hotel_cache(booking.hotel_id)
+        except Exception as cache_error:
+            print(f"Cache error: {cache_error}")
+        
+        return {"message": "Бронирование успешно удалено"}
+        
+    except Exception as e:
+        db.rollback()
+        print(f"Error deleting booking {booking_id}: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Ошибка при удалении бронирования: {str(e)}")
