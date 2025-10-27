@@ -560,7 +560,20 @@ class HotelBookingApp {
             }
         }
     }
+    async deleteBooking(booking_id) {
+        if (confirm('Вы уверены, что хотите удалить это бронирование?')) {
+            try {
+                await ApiClient.delete(`/bookings/${booking_id}`);
+                UIUtils.showMessage('Бронирование успешно удалено');
+                await app.loadBookings();
+            } catch (error) {
+                UIUtils.showMessage('Ошибка при удалении бронирования', 'error');
+            }
+        }
+    }
 }
+
+
 
 // Глобальные функции
 function showModal(title, content) {
