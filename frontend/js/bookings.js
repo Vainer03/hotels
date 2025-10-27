@@ -25,9 +25,10 @@ function renderBookings() {
                 ${booking.special_requests ? `<p><strong>Особые пожелания:</strong> ${booking.special_requests}</p>` : ''}
                 
                 <div class="card-actions">
-                    <button class="btn btn-success" onclick="checkInBooking(${booking.id})" ${booking.status !== 'confirmed' ? 'disabled' : ''}>Заезд</button>
-                    <button class="btn btn-warning" onclick="checkOutBooking(${booking.id})" ${booking.status !== 'checked_in' ? 'disabled' : ''}>Выезд</button>
-                    <button class="btn btn-danger" onclick="cancelBooking(${booking.id})" ${!['confirmed', 'checked_in'].includes(booking.status) ? 'disabled' : ''}>Отменить</button>
+                    <button class="btn btn-success" onclick="checkInBooking(${booking.id})" ${booking.status !== 'confirmed' ? 'disabled' : ''}>✅ Заезд</button>
+                    <button class="btn btn-warning" onclick="checkOutBooking(${booking.id})" ${booking.status !== 'checked_in' ? 'disabled' : ''}>🏁 Выезд</button>
+                    <button class="btn btn-danger" onclick="cancelBooking(${booking.id})" ${!['confirmed', 'checked_in'].includes(booking.status) ? 'disabled' : ''}>❌ Отменить</button>
+                    <button class="btn" onclick="deleteBooking(${booking.id})" style="background-color: #6c757d; color: white;">🗑️ Удалить</button>
                 </div>
             </div>
         `;
@@ -249,5 +250,17 @@ function bookThisRoom(roomId) {
                 document.querySelector('select[name="room_id"]').value = roomId;
             }, 100);
         }, 100);
+    }
+}
+
+async function deleteBooking(booking_id) {
+    if (confirm('Вы уверены, что хотите удалить это бронирование?')) {
+        try {
+            await ApiClient.delete(`/bookings/${booking_id}`);
+            UIUtils.showMessage('Бронирование успешно удалено');
+            await app.loadBookings();
+        } catch (error) {
+            UIUtils.showMessage('Ошибка при удалении бронирования', 'error');
+        }
     }
 }

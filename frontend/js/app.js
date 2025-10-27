@@ -215,6 +215,10 @@ class HotelBookingApp {
                                 ${!['confirmed', 'checked_in'].includes(booking.status) ? 'disabled' : ''}>
                             ❌ Отменить
                         </button>
+                        <button class="btn" onclick="app.deleteBooking(${booking.id})" 
+                            style="background-color: #6c757d; color: white;">
+                            🗑️ Удалить
+                        </button>
                     </div>
                 </div>
             `;
