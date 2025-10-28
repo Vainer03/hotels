@@ -47,19 +47,6 @@ class CacheService:
         key = f"rooms_search:{':'.join(key_parts)}"
         
         return await manager.get_key(key)
-    
-    # async def cache_user_bookings(self, user_id: int, bookings_data: List[Dict[str, Any]], expire: int = 1800):
-    #     """Кэшировать бронирования пользователя"""
-    #     manager = await self._get_manager()
-    #     key = f"user_bookings:{user_id}"
-    #     await manager.set_key(key, bookings_data, expire)
-    #     logger.info(f"User {user_id} bookings cached")
-    
-    # async def get_cached_user_bookings(self, user_id: int) -> Optional[List[Dict[str, Any]]]:
-    #     """Получить кэшированные бронирования пользователя"""
-    #     manager = await self._get_manager()
-    #     key = f"user_bookings:{user_id}"
-    #     return await manager.get_key(key)
 
     async def cache_user_bookings(self, user_id: int, bookings_data: List[dict]):
         """Кэшировать бронирования пользователя"""
@@ -151,9 +138,11 @@ class JSONEncoder(json.JSONEncoder):
             return obj.isoformat()
         return super().default(obj)
 
-def set_cache(self, key, value, expire=3600):
+async def set_cache(self, key, value, expire=3600):
     try:
+        if not self.redis:
+            return
         serialized_value = json.dumps(value, cls=JSONEncoder)
-        self.redis_client.setex(key, expire, serialized_value)
+        await self.redis.set(key, serialized_value, ex=expire)
     except Exception as e:
         print(f"Cache set error: {e}")

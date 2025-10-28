@@ -110,19 +110,11 @@ async def root_no_prefix():
     }
 
 if __name__ == "__main__":
-    uvicorn.run(
-        "main:app",
-        host="0.0.0.0", 
-        port=8000,
-        reload=True
-    )
-
-if __name__ == "__main__":
     print("=" * 50)
     print("Hotel Booking API Starting...")
-    print("URL: http://localhost:8000")
-    print("Docs: http://localhost:8000/docs")
-    print("Health: http://localhost:8000/health")
+    print("URL: http://localhost:80")
+    print("Docs: http://localhost:80/docs")
+    print("Health: http://localhost:80/health")
     print("RabbitMQ: http://localhost:15672 (guest/guest)")
     print("Redis: localhost:6379")
     print("=" * 50)

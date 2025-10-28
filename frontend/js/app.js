@@ -561,13 +561,13 @@ class HotelBookingApp {
         }
     }
     async deleteBooking(booking_id) {
-        if (confirm('Вы уверены, что хотите удалить это бронирование?')) {
+        if (confirm('❌ Вы уверены, что хотите удалить это бронирование?')) {
             try {
                 await ApiClient.delete(`/bookings/${booking_id}`);
-                UIUtils.showMessage('Бронирование успешно удалено');
+                UIUtils.showMessage('✅ Бронирование успешно удалено');
                 await app.loadBookings();
             } catch (error) {
-                UIUtils.showMessage('Ошибка при удалении бронирования', 'error');
+                UIUtils.showMessage('❌ Ошибка при удалении бронирования', 'error');
             }
         }
     }

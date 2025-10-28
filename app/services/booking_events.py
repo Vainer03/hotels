@@ -1,6 +1,7 @@
 import logging
 from app.schemas.messages import BookingEvent, BookingEventType
 from app.core.rabbitmq import get_rabbitmq_manager
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -21,8 +22,8 @@ class BookingEventService:
             user_id=booking_data["user_id"],
             hotel_id=booking_data["hotel_id"],
             room_id=booking_data["room_id"],
-            check_in_date=booking_data["check_in_date"].isoformat(),
-            check_out_date=booking_data["check_out_date"].isoformat(),
+            check_in_date=booking_data["check_in_date"].isoformat() if isinstance(booking_data["check_in_date"], datetime) else booking_data["check_in_date"],
+            check_out_date=booking_data["check_out_date"].isoformat() if isinstance(booking_data["check_out_date"], datetime) else booking_data["check_out_date"],
             total_price=booking_data["total_price"],
             metadata={
                 "booking_reference": booking_data.get("booking_reference"),
