@@ -82,19 +82,19 @@ services:
     networks:
       - hotel-booking-network
 
-  init-db:
-    build: .
-    container_name: hotel-booking-init-db
-    environment:
-      - DATABASE_URL=postgresql://postgres:HWme072481@postgres:5432/hotel_booking
-      - PYTHONPATH=/app
-    volumes:
-      - hotel-data:/app/data
-    command: ["python", "app/create_mock_data.py"]
-    networks:
-      - hotel-booking-network
-    depends_on:
-      - hotel-booking-api
+  # init-db:
+  #   build: .
+  #   container_name: hotel-booking-init-db
+  #   environment:
+  #     - DATABASE_URL=postgresql://postgres:HWme072481@postgres:5432/hotel_booking
+  #     - PYTHONPATH=/app
+  #   volumes:
+  #     - hotel-data:/app/data
+  #   command: ["python", "app/create_mock_data.py"]
+  #   networks:
+  #     - hotel-booking-network
+  #   depends_on:
+  #     - hotel-booking-api
 
   postgres:
     image: postgres:15-alpine
