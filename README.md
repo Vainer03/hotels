@@ -88,7 +88,7 @@ docker-compose ps
 
 4. **Откройте приложение**
    - Frontend: http://localhost
-   - API Docs: http://localhost/docs
+   - API Docs: http://localhost/api/v1/docs
    - RabbitMQ: http://localhost:15672 (guest/guest)
 
 ### Инициализация данных
