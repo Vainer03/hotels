@@ -4,7 +4,7 @@ from decimal import Decimal
 from datetime import date, datetime
 import enum
 
-from app.core.enums import RoomStatus, BookingStatus
+from app.core.enums import RoomStatus, BookingStatus, UserRole
 
 class TaskResponse(BaseModel):
     task_id: str
@@ -92,6 +92,7 @@ class UserBase(BaseModel):
     first_name: str
     last_name: str
     phone: Optional[str] = None
+    role: UserRole = UserRole.USER
 
 class UserCreate(UserBase):
     pass
@@ -101,6 +102,7 @@ class UserUpdate(BaseModel):
     first_name: Optional[str] = None
     last_name: Optional[str] = None
     phone: Optional[str] = None
+    role: Optional[UserRole] = None
 
 class UserRead(UserBase):
     id: int

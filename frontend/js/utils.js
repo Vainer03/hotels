@@ -6,98 +6,137 @@ const API_BASE_URL = getApiBaseUrl();
 
 console.log(`API Base URL: ${API_BASE_URL}`);
 console.log(`Current host: ${window.location.hostname}`);
+
+class AuthManager {
+    static CURRENT_USER_KEY = 'current_user';
+    static TOKEN_KEY = 'auth_token';
+
+    static setCurrentUser(user) {
+        localStorage.setItem(this.CURRENT_USER_KEY, JSON.stringify(user));
+    }
+
+    static getCurrentUser() {
+        const userStr = localStorage.getItem(this.CURRENT_USER_KEY);
+        return userStr ? JSON.parse(userStr) : null;
+    }
+
+    static isAdmin() {
+        const user = this.getCurrentUser();
+        return user && user.role === 'admin';
+    }
+
+    static isUser() {
+        const user = this.getCurrentUser();
+        return user && user.role === 'user';
+    }
+
+    static isAuthenticated() {
+        return !!this.getCurrentUser();
+    }
+
+    static logout() {
+        localStorage.removeItem(this.CURRENT_USER_KEY);
+        localStorage.removeItem(this.TOKEN_KEY);
+        window.location.reload();
+    }
+
+    static async login(email, password) {
+        // Временная реализация - в реальном приложении здесь будет JWT
+        try {
+            const users = await ApiClient.get('/users/');
+            const user = users.find(u => u.email === email);
+            
+            if (user) {
+                this.setCurrentUser(user);
+                return user;
+            } else {
+                throw new Error('Пользователь не найден');
+            }
+        } catch (error) {
+            throw new Error('Ошибка авторизации');
+        }
+    }
+
+    static async register(userData) {
+        try {
+            const newUser = await ApiClient.post('/users/register', userData);
+            this.setCurrentUser(newUser);
+            return newUser;
+        } catch (error) {
+            throw error;
+        }
+    }
+}
+
 class ApiClient {
-    static async get(endpoint) {
+    static async request(endpoint, options = {}) {
+        const user = AuthManager.getCurrentUser();
+        
+        const headers = {
+            'Content-Type': 'application/json',
+            ...options.headers
+        };
+
+        // Добавляем user_id в заголовки для временной аутентификации
+        if (user) {
+            headers['X-User-ID'] = user.id;
+        }
+
+        const config = {
+            ...options,
+            headers
+        };
+
         try {
-            console.log(`GET ${endpoint}`);
-            const response = await fetch(`${API_BASE_URL}${endpoint}`);
+            console.log(`${config.method || 'GET'} ${endpoint}`);
+            const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
             
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+            if (response.status === 403) {
+                UIUtils.showMessage('Доступ запрещен. Недостаточно прав.', 'error');
+                throw new Error('Доступ запрещен');
             }
             
-            const data = await response.json();
-            console.log(`GET ${endpoint} response:`, data);
-            return data;
-        } catch (error) {
-            console.error(`GET Error ${endpoint}:`, error);
-            throw error;
-        }
-    }
-
-    static async post(endpoint, data) {
-        try {
-            console.log(`POST ${endpoint}:`, data);
-            const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(data)
-            });
-            
-            const responseData = await response.json();
-            
             if (!response.ok) {
-                throw new Error(responseData.detail || `HTTP error! status: ${response.status}`);
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.detail || `HTTP error! status: ${response.status}`);
             }
             
-            console.log(`POST ${endpoint} response:`, responseData);
-            return responseData;
-        } catch (error) {
-            console.error(`POST Error ${endpoint}:`, error);
-            throw error;
-        }
-    }
-
-    static async put(endpoint, data) {
-        try {
-            console.log(`PUT ${endpoint}:`, data);
-            const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(data)
-            });
-            
-            const responseData = await response.json();
-            
-            if (!response.ok) {
-                throw new Error(responseData.detail || `HTTP error! status: ${response.status}`);
-            }
-            
-            console.log(`PUT ${endpoint} response:`, responseData);
-            return responseData;
-        } catch (error) {
-            console.error(`PUT Error ${endpoint}:`, error);
-            throw error;
-        }
-    }
-
-    static async delete(endpoint) {
-        try {
-            console.log(`DELETE ${endpoint}`);
-            const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-                method: 'DELETE'
-            });
-            
-            if (response.status === 204) { // No Content
+            // Для DELETE запросов может не быть тела
+            if (response.status === 204) {
                 return { message: 'Deleted successfully' };
             }
             
             const data = await response.json();
-            
-            if (!response.ok) {
-                throw new Error(data.detail || `HTTP error! status: ${response.status}`);
-            }
-            
-            console.log(`DELETE ${endpoint} response:`, data);
+            console.log(`${config.method || 'GET'} ${endpoint} response:`, data);
             return data;
         } catch (error) {
-            console.error(`DELETE Error ${endpoint}:`, error);
+            console.error(`API Error ${endpoint}:`, error);
             throw error;
         }
+    }
+
+    static async get(endpoint) {
+        return this.request(endpoint);
+    }
+
+    static async post(endpoint, data) {
+        return this.request(endpoint, {
+            method: 'POST',
+            body: JSON.stringify(data)
+        });
+    }
+
+    static async put(endpoint, data) {
+        return this.request(endpoint, {
+            method: 'PUT',
+            body: JSON.stringify(data)
+        });
+    }
+
+    static async delete(endpoint) {
+        return this.request(endpoint, {
+            method: 'DELETE'
+        });
     }
 }
 

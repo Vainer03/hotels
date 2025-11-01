@@ -19,16 +19,43 @@
                 <button class="nav-link" data-tab="bookings">Бронирования</button>
                 <button class="nav-link" data-tab="search">Поиск</button>
             </div>
+            <div class="nav-auth" id="nav-auth">
+                <!-- Будет заполнено JavaScript -->
+            </div>
         </nav>
     </header>
 
     <main class="container">
         <div id="message" class="message hidden"></div>
 
-        <section id="hotels-tab" class="tab-content active">
+        <!-- Добавим таб для авторизации -->
+        <section id="auth-tab" class="tab-content active">
+            <div class="auth-container">
+                <div class="auth-form">
+                    <h2>Вход в систему</h2>
+                    <form id="login-form">
+                        <div class="form-group">
+                            <label>Email:</label>
+                            <input type="email" id="login-email" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Пароль:</label>
+                            <input type="password" id="login-password" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Войти</button>
+                    </form>
+                    <div class="auth-divider">
+                        <span>или</span>
+                    </div>
+                    <button class="btn" onclick="showRegisterForm()">Зарегистрироваться</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="hotels-tab" class="tab-content">
             <div class="section-header">
                 <h2>Управление отелями</h2>
-                <button class="btn btn-primary" onclick="app.showHotelForm()">+ Добавить отель</button>
+                <button class="btn btn-primary" id="add-hotel-btn" onclick="app.showHotelForm()">+ Добавить отель</button>
             </div>
             <div id="hotels-list" class="cards-container"></div>
         </section>
@@ -36,7 +63,7 @@
         <section id="rooms-tab" class="tab-content">
             <div class="section-header">
                 <h2>Управление комнатами</h2>
-                <button class="btn btn-primary" onclick="showRoomForm()">+ Добавить комнату</button>
+                <button class="btn btn-primary" id="add-room-btn" onclick="showRoomForm()">+ Добавить комнату</button>
             </div>
             <div id="rooms-list" class="cards-container"></div>
         </section>
@@ -44,7 +71,7 @@
         <section id="bookings-tab" class="tab-content">
             <div class="section-header">
                 <h2>Бронирования</h2>
-                <button class="btn btn-primary" onclick="showBookingForm()">+ Новое бронирование</button>
+                <button class="btn btn-primary" id="add-booking-btn" onclick="showBookingForm()">+ Новое бронирование</button>
             </div>
             <div id="bookings-list" class="cards-container"></div>
         </section>
@@ -52,7 +79,7 @@
         <section id="guests-tab" class="tab-content">
             <div class="section-header">
                 <h2>Управление гостями</h2>
-                <button class="btn btn-primary" onclick="app.showGuestForm()">+ Добавить гостя</button>
+                <button class="btn btn-primary" id="add-guest-btn" onclick="app.showGuestForm()">+ Добавить гостя</button>
             </div>
             <div id="guests-list" class="cards-container"></div>
         </section>

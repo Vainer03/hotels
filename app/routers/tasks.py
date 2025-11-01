@@ -8,6 +8,7 @@ from app.tasks.report_tasks import generate_hotel_report
 from app.tasks.analytics_tasks import analyze_booking_trends
 from app.core.celery import celery_app
 import app.schemas.schemas as schemas
+from app.core.enums import UserRole
 
 router = APIRouter(prefix="/tasks", tags=["tasks"])
 
@@ -25,6 +26,7 @@ async def init_mock_data():
         db = SessionLocal()
         
         try:
+            # Очистка данных в правильном порядке (с учетом внешних ключей)
             db.query(Booking).delete()
             db.query(Room).delete()
             db.query(Hotel).delete()
@@ -134,18 +136,109 @@ async def init_mock_data():
             
             db.flush()
 
-            # Пользователи
+            # Пользователи - ОБНОВЛЕНО С РОЛЯМИ
             users_data = [
-                {"email": "ivan.petrov@example.com", "first_name": "Иван", "last_name": "Петров", "phone": "+79991234567"},
-                {"email": "maria.ivanova@example.com", "first_name": "Мария", "last_name": "Иванова", "phone": "+79992345678"},
-                {"email": "alex.smirnov@example.com", "first_name": "Алексей", "last_name": "Смирнов", "phone": "+79993456789"},
-                {"email": "olga.sidorova@example.com", "first_name": "Ольга", "last_name": "Сидорова", "phone": "+79994567890"},
-                {"email": "dmitry.kuznetsov@example.com", "first_name": "Дмитрий", "last_name": "Кузнецов", "phone": "+79995678901"},
-                {"email": "ekaterina.popova@example.com", "first_name": "Екатерина", "last_name": "Попова", "phone": "+79996789012"},
-                {"email": "sergey.volkov@example.com", "first_name": "Сергей", "last_name": "Волков", "phone": "+79997890123"},
-                {"email": "natalia.fedorova@example.com", "first_name": "Наталия", "last_name": "Федорова", "phone": "+79998901234"},
-                {"email": "andrey.morozov@example.com", "first_name": "Андрей", "last_name": "Морозов", "phone": "+79999012345"},
-                {"email": "tatyana.nikitina@example.com", "first_name": "Татьяна", "last_name": "Никитина", "phone": "+79990123456"}
+                # Администраторы
+                {
+                    "email": "admin@hotels.com", 
+                    "first_name": "Алексей", 
+                    "last_name": "Администраторов", 
+                    "phone": "+79990000001",
+                    "role": UserRole.ADMIN
+                },
+                {
+                    "email": "manager@hotels.com", 
+                    "first_name": "Мария", 
+                    "last_name": "Менеджерова", 
+                    "phone": "+79990000002",
+                    "role": UserRole.ADMIN
+                },
+                
+                # Обычные пользователи
+                {
+                    "email": "ivan.petrov@example.com", 
+                    "first_name": "Иван", 
+                    "last_name": "Петров", 
+                    "phone": "+79991234567",
+                    "role": UserRole.USER
+                },
+                {
+                    "email": "maria.ivanova@example.com", 
+                    "first_name": "Мария", 
+                    "last_name": "Иванова", 
+                    "phone": "+79992345678",
+                    "role": UserRole.USER
+                },
+                {
+                    "email": "alex.smirnov@example.com", 
+                    "first_name": "Алексей", 
+                    "last_name": "Смирнов", 
+                    "phone": "+79993456789",
+                    "role": UserRole.USER
+                },
+                {
+                    "email": "olga.sidorova@example.com", 
+                    "first_name": "Ольга", 
+                    "last_name": "Сидорова", 
+                    "phone": "+79994567890",
+                    "role": UserRole.USER
+                },
+                {
+                    "email": "dmitry.kuznetsov@example.com", 
+                    "first_name": "Дмитрий", 
+                    "last_name": "Кузнецов", 
+                    "phone": "+79995678901",
+                    "role": UserRole.USER
+                },
+                {
+                    "email": "ekaterina.popova@example.com", 
+                    "first_name": "Екатерина", 
+                    "last_name": "Попова", 
+                    "phone": "+79996789012",
+                    "role": UserRole.USER
+                },
+                {
+                    "email": "sergey.volkov@example.com", 
+                    "first_name": "Сергей", 
+                    "last_name": "Волков", 
+                    "phone": "+79997890123",
+                    "role": UserRole.USER
+                },
+                {
+                    "email": "natalia.fedorova@example.com", 
+                    "first_name": "Наталия", 
+                    "last_name": "Федорова", 
+                    "phone": "+79998901234",
+                    "role": UserRole.USER
+                },
+                {
+                    "email": "andrey.morozov@example.com", 
+                    "first_name": "Андрей", 
+                    "last_name": "Морозов", 
+                    "phone": "+79999012345",
+                    "role": UserRole.USER
+                },
+                {
+                    "email": "tatyana.nikitina@example.com", 
+                    "first_name": "Татьяна", 
+                    "last_name": "Никитина", 
+                    "phone": "+79990123456",
+                    "role": UserRole.USER
+                },
+                {
+                    "email": "business.traveler@example.com", 
+                    "first_name": "Артем", 
+                    "last_name": "Деловой", 
+                    "phone": "+79991112233",
+                    "role": UserRole.USER
+                },
+                {
+                    "email": "family.vacation@example.com", 
+                    "first_name": "Светлана", 
+                    "last_name": "Семейная", 
+                    "phone": "+79992223344",
+                    "role": UserRole.USER
+                }
             ]
             
             users = []
@@ -156,11 +249,11 @@ async def init_mock_data():
 
             db.flush()
 
-            # Бронирования
+            # Бронирования - ОБНОВЛЕНО С УЧЕТОМ РОЛЕЙ
             bookings_data = [
-                # Текущие бронирования
+                # Текущие бронирования пользователей
                 {
-                    "user_id": users[0].id,
+                    "user_id": users[2].id,  # Иван Петров (USER)
                     "room_id": rooms[0].id, 
                     "hotel_id": hotels[0].id,
                     "check_in_date": datetime.now() + timedelta(days=7),
@@ -171,7 +264,7 @@ async def init_mock_data():
                     "special_requests": "Прошу номер на высоком этаже"
                 },
                 {
-                    "user_id": users[0].id,
+                    "user_id": users[2].id,  # Иван Петров (USER)
                     "room_id": rooms[3].id, 
                     "hotel_id": hotels[0].id,
                     "check_in_date": datetime.now() + timedelta(days=30),
@@ -184,7 +277,7 @@ async def init_mock_data():
                 
                 # Активные бронирования
                 {
-                    "user_id": users[1].id,
+                    "user_id": users[3].id,  # Мария Иванова (USER)
                     "room_id": rooms[5].id, 
                     "hotel_id": hotels[1].id,
                     "check_in_date": datetime.now() + timedelta(days=3),
@@ -195,7 +288,7 @@ async def init_mock_data():
                     "special_requests": "Требуется трансфер из аэропорта"
                 },
                 {
-                    "user_id": users[2].id,
+                    "user_id": users[4].id,  # Алексей Смирнов (USER)
                     "room_id": rooms[10].id,  
                     "hotel_id": hotels[2].id,
                     "check_in_date": datetime.now() + timedelta(days=14),
@@ -208,7 +301,7 @@ async def init_mock_data():
                 
                 # Завершенные бронирования
                 {
-                    "user_id": users[1].id,
+                    "user_id": users[3].id,  # Мария Иванова (USER)
                     "room_id": rooms[8].id,  
                     "hotel_id": hotels[1].id,
                     "check_in_date": datetime.now() - timedelta(days=10),
@@ -219,7 +312,7 @@ async def init_mock_data():
                     "special_requests": None
                 },
                 {
-                    "user_id": users[3].id,
+                    "user_id": users[5].id,  # Ольга Сидорова (USER)
                     "room_id": rooms[15].id,
                     "hotel_id": hotels[3].id,
                     "check_in_date": datetime.now() - timedelta(days=20),
@@ -232,7 +325,7 @@ async def init_mock_data():
                 
                 # Отмененные бронирования
                 {
-                    "user_id": users[4].id,
+                    "user_id": users[6].id,  # Дмитрий Кузнецов (USER)
                     "room_id": rooms[20].id,
                     "hotel_id": hotels[4].id,
                     "check_in_date": datetime.now() + timedelta(days=5),
@@ -243,9 +336,9 @@ async def init_mock_data():
                     "special_requests": None
                 },
                 
-                # Дополнительные бронирования
+                # Бронирования администраторов (для тестирования)
                 {
-                    "user_id": users[5].id,
+                    "user_id": users[0].id,  # Алексей Администраторов (ADMIN)
                     "room_id": rooms[25].id,
                     "hotel_id": hotels[5].id,
                     "check_in_date": datetime.now() + timedelta(days=12),
@@ -253,10 +346,10 @@ async def init_mock_data():
                     "number_of_guests": 3,
                     "total_price": 13500,
                     "status": "confirmed",
-                    "special_requests": "Нужен завтрак в номер"
+                    "special_requests": "Служебная командировка"
                 },
                 {
-                    "user_id": users[6].id,
+                    "user_id": users[1].id,  # Мария Менеджерова (ADMIN)
                     "room_id": rooms[30].id,
                     "hotel_id": hotels[6].id,
                     "check_in_date": datetime.now() + timedelta(days=25),
@@ -264,10 +357,12 @@ async def init_mock_data():
                     "number_of_guests": 2,
                     "total_price": 12000,
                     "status": "confirmed",
-                    "special_requests": "Деловая поездка"
+                    "special_requests": "Проверка качества обслуживания"
                 },
+                
+                # Дополнительные бронирования пользователей
                 {
-                    "user_id": users[7].id,
+                    "user_id": users[7].id,  # Екатерина Попова (USER)
                     "room_id": rooms[35].id,
                     "hotel_id": hotels[7].id,
                     "check_in_date": datetime.now() + timedelta(days=40),
@@ -278,7 +373,7 @@ async def init_mock_data():
                     "special_requests": "Семейный отдых с детьми"
                 },
                 {
-                    "user_id": users[8].id,
+                    "user_id": users[8].id,  # Сергей Волков (USER)
                     "room_id": rooms[40].id,
                     "hotel_id": hotels[0].id,
                     "check_in_date": datetime.now() + timedelta(days=18),
@@ -289,7 +384,7 @@ async def init_mock_data():
                     "special_requests": "Романтический уикенд"
                 },
                 {
-                    "user_id": users[9].id,
+                    "user_id": users[9].id,  # Наталия Федорова (USER)
                     "room_id": rooms[45].id,
                     "hotel_id": hotels[1].id,
                     "check_in_date": datetime.now() + timedelta(days=8),
@@ -300,7 +395,7 @@ async def init_mock_data():
                     "special_requests": "Командировка"
                 },
                 {
-                    "user_id": users[2].id,
+                    "user_id": users[10].id,  # Андрей Морозов (USER)
                     "room_id": rooms[50].id,
                     "hotel_id": hotels[2].id,
                     "check_in_date": datetime.now() + timedelta(days=35),
@@ -311,7 +406,7 @@ async def init_mock_data():
                     "special_requests": "Отдых с семьей"
                 },
                 {
-                    "user_id": users[4].id,
+                    "user_id": users[11].id,  # Татьяна Никитина (USER)
                     "room_id": rooms[55].id,
                     "hotel_id": hotels[3].id,
                     "check_in_date": datetime.now() + timedelta(days=22),
@@ -320,6 +415,28 @@ async def init_mock_data():
                     "total_price": 15000,
                     "status": "confirmed",
                     "special_requests": "Экскурсия по городу"
+                },
+                {
+                    "user_id": users[12].id,  # Артем Деловой (USER)
+                    "room_id": rooms[60].id,
+                    "hotel_id": hotels[4].id,
+                    "check_in_date": datetime.now() + timedelta(days=2),
+                    "check_out_date": datetime.now() + timedelta(days=4),
+                    "number_of_guests": 1,
+                    "total_price": 14000,
+                    "status": "confirmed",
+                    "special_requests": "Бизнес-поездка, нужен хороший Wi-Fi"
+                },
+                {
+                    "user_id": users[13].id,  # Светлана Семейная (USER)
+                    "room_id": rooms[65].id,
+                    "hotel_id": hotels[5].id,
+                    "check_in_date": datetime.now() + timedelta(days=50),
+                    "check_out_date": datetime.now() + timedelta(days=60),
+                    "number_of_guests": 5,
+                    "total_price": 45000,
+                    "status": "confirmed",
+                    "special_requests": "Семейный отпуск, нужны детские кровати"
                 }
             ]
             
@@ -334,7 +451,12 @@ async def init_mock_data():
             
             db.commit()
             
-            return {"message": f"Моковые данные успешно созданы! Создано: {len(hotels)} отелей, {len(rooms)} комнат, {len(users)} пользователей, {len(bookings_data)} бронирований. Перезагрузите страницу."}
+            admin_count = len([u for u in users if u.role == UserRole.ADMIN])
+            user_count = len([u for u in users if u.role == UserRole.USER])
+            
+            return {
+                "message": f"Моковые данные успешно созданы! Создано: {len(hotels)} отелей, {len(rooms)} комнат, {len(users)} пользователей ({admin_count} администраторов, {user_count} пользователей), {len(bookings_data)} бронирований. Перезагрузите страницу."
+            }
             
         except Exception as e:
             db.rollback()

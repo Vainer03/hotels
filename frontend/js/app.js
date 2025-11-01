@@ -5,14 +5,25 @@ class HotelBookingApp {
         this.rooms = [];
         this.bookings = [];
         this.users = [];
+        this.currentUser = null;
         
         this.init();
     }
 
     init() {
         this.setupEventListeners();
-        this.loadInitialData();
-        this.showTab('hotels');
+        //this.loadInitialData();
+        //this.showTab('hotels');
+        this.checkAuthStatus();
+    }
+
+    checkAuthStatus() {
+        this.currentUser = AuthManager.getCurrentUser();
+        if (this.currentUser) {
+            this.showApp();
+        } else {
+            this.showAuth();
+        }
     }
 
     setupEventListeners() {

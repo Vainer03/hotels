@@ -5,7 +5,7 @@ import uuid
 import enum
 
 from app.database import Base
-from app.core.enums import RoomStatus, BookingStatus 
+from app.core.enums import RoomStatus, BookingStatus, UserRole
 
 class Hotel(Base):
     __tablename__ = "hotels"
@@ -62,6 +62,7 @@ class User(Base):
     first_name = Column(String(50), nullable=False)
     last_name = Column(String(50), nullable=False)
     phone = Column(String(20), nullable=True)
+    role = Column(Enum(UserRole), default=UserRole.USER)
     created_at = Column(DateTime, default=datetime.utcnow)
     
     bookings = relationship(
