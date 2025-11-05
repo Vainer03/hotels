@@ -180,6 +180,30 @@ class AuthManager {
             throw error;
         }
     }
+
+    static async get(endpoint) {
+        return this.request(endpoint);
+    }
+
+    static async post(endpoint, data) {
+        return this.request(endpoint, {
+            method: 'POST',
+            body: JSON.stringify(data)
+        });
+    }
+
+    static async put(endpoint, data) {
+        return this.request(endpoint, {
+            method: 'PUT',
+            body: JSON.stringify(data)
+        });
+    }
+
+    static async delete(endpoint) {
+        return this.request(endpoint, {
+            method: 'DELETE'
+        });
+    }
 }
 
 class UIUtils {

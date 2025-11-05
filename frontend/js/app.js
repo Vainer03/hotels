@@ -6,6 +6,7 @@ class HotelBookingApp {
         this.bookings = [];
         this.users = [];
         this.currentUser = null;
+        this.currentUser = null;
         
         this.init();
     }
@@ -27,8 +28,8 @@ class HotelBookingApp {
     showApp() {
         this.currentTab = 'hotels';
         this.updateUIForUserRole();
-        this.loadInitialData();
-        this.showTab('hotels');
+        //this.loadInitialData();
+        //this.showTab('hotels');
         document.getElementById('auth-tab').classList.remove('active');
         this.updateAuthUI();
     }
@@ -43,6 +44,16 @@ class HotelBookingApp {
             }
         });
         this.updateAuthUI();
+        this.checkAuthStatus();
+    }
+
+    checkAuthStatus() {
+        this.currentUser = AuthManager.getCurrentUser();
+        if (this.currentUser) {
+            this.showApp();
+        } else {
+            this.showAuth();
+        }
     }
 
     setupEventListeners() {
