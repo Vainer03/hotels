@@ -6,7 +6,6 @@ class HotelBookingApp {
         this.bookings = [];
         this.users = [];
         this.currentUser = null;
-        this.currentUser = null;
         
         this.init();
     }
@@ -28,8 +27,8 @@ class HotelBookingApp {
     showApp() {
         this.currentTab = 'hotels';
         this.updateUIForUserRole();
-        //this.loadInitialData();
-        //this.showTab('hotels');
+        this.loadInitialData();
+        this.showTab('hotels');
         document.getElementById('auth-tab').classList.remove('active');
         this.updateAuthUI();
     }
@@ -44,16 +43,6 @@ class HotelBookingApp {
             }
         });
         this.updateAuthUI();
-        this.checkAuthStatus();
-    }
-
-    checkAuthStatus() {
-        this.currentUser = AuthManager.getCurrentUser();
-        if (this.currentUser) {
-            this.showApp();
-        } else {
-            this.showAuth();
-        }
     }
 
     setupEventListeners() {
@@ -171,19 +160,20 @@ class HotelBookingApp {
         console.log('🚀 Starting initial data load...');
         
         try {
-            // Загружаем пользователей с обработкой ошибок
-            await this.loadUsersWithRetry();
+            // Используем фиксированных пользователей
+            this.users = AuthManager.getFixedUsers();
+            console.log(`✅ Using ${this.users.length} fixed users`);
             
-            // Загружаем остальные данные
+            // Загружаем остальные данные с API
             await Promise.all([
                 this.loadHotels(),
-                this.loadRooms(),
+                this.loadRooms(), 
                 this.loadBookings()
             ]);
             
             console.log('✅ All data loaded successfully');
         } catch (error) {
-            console.error('❌ Error loading initial data:', error);
+            console.error('❌ Error loading data:', error);
             UIUtils.showMessage('Ошибка загрузки данных: ' + error.message, 'error');
         }
     }
