@@ -58,7 +58,7 @@ async def get_users(
     skip: int = 0,
     limit: int = 100,
     db: Session = Depends(get_db),
-    current_user: models.User = Depends(require_admin)
+    # current_user: models.User = Depends(require_admin)
 ):
     """Получить список всех пользователей"""
     return db.query(models.User).offset(skip).limit(limit).all()

@@ -116,7 +116,6 @@ async function saveRoom(roomId = null) {
     try {
         const formData = FormUtils.getFormData('room-form');
         
-        // Конвертируем числовые поля
         formData.floor = parseInt(formData.floor);
         formData.price_per_night = parseFloat(formData.price_per_night);
         formData.capacity = parseInt(formData.capacity);

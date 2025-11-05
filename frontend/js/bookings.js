@@ -56,7 +56,6 @@ function showBookingForm() {
             `<option value="${user.id}">${user.first_name} ${user.last_name} (${user.email})</option>`
         ).join('');
     } else {
-        // Обычные пользователи могут создавать бронирования только для себя
         usersOptions = `<option value="${currentUser.id}" selected>${currentUser.first_name} ${currentUser.last_name} (${currentUser.email})</option>`;
     }
     
@@ -128,7 +127,6 @@ function showBookingForm() {
     
     showModal('Новое бронирование', content);
     
-    // Если не админ, автоматически устанавливаем текущего пользователя
     if (!isAdmin) {
         setTimeout(() => {
             document.querySelector('select[name="user_id"]').value = currentUser.id;
@@ -151,7 +149,6 @@ async function saveBooking() {
     try {
         const formData = FormUtils.getFormData('booking-form');
         
-        // Конвертируем числовые поля
         formData.user_id = parseInt(formData.user_id);
         formData.hotel_id = parseInt(formData.hotel_id);
         formData.room_id = parseInt(formData.room_id);

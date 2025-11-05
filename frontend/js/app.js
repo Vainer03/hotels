@@ -36,7 +36,6 @@ class HotelBookingApp {
     showAuth() {
         this.currentTab = 'auth';
         document.getElementById('auth-tab').classList.add('active');
-        // Скрываем все остальные табы
         document.querySelectorAll('.tab-content').forEach(tab => {
             if (tab.id !== 'auth-tab') {
                 tab.classList.remove('active');
@@ -46,7 +45,6 @@ class HotelBookingApp {
     }
 
     setupEventListeners() {
-        // Навигация
         document.querySelectorAll('.nav-link').forEach(link => {
             link.addEventListener('click', (e) => {
                 if (!AuthManager.isAuthenticated()) {
@@ -58,13 +56,11 @@ class HotelBookingApp {
             });
         });
 
-        // Форма входа
         document.getElementById('login-form')?.addEventListener('submit', (e) => {
             e.preventDefault();
             this.handleLogin();
         });
 
-        // Обновляем панель авторизации
         this.updateAuthUI();
     }
 
@@ -72,35 +68,19 @@ class HotelBookingApp {
         const email = document.getElementById('login-email').value;
         const password = document.getElementById('login-password').value;
 
-        if (!email || !password) {
-            UIUtils.showMessage('Заполните все поля', 'error');
+        if (!email) {
+            UIUtils.showMessage('Введите email', 'error');
             return;
         }
 
         try {
-            UIUtils.showMessage('Выполняется вход...', 'success');
-            
-            // Используем диагностическую версию логина
-            const user = await AuthManager.loginWithDiagnosis(email, password);
+            const user = await AuthManager.login(email, password);
             this.currentUser = user;
             
             UIUtils.showMessage(`Добро пожаловать, ${user.first_name}!`);
             this.showApp();
         } catch (error) {
-            console.error('💥 Final login error:', error);
-            
-            let errorMessage = 'Ошибка входа';
-            if (error.message.includes('422')) {
-                errorMessage = 'Ошибка валидации на сервере. Сервер ожидает другие данные.';
-            } else if (error.message.includes('404')) {
-                errorMessage = 'Сервер не найден или endpoint недоступен.';
-            } else if (error.message.includes('Network Error')) {
-                errorMessage = 'Проблемы с сетью. Проверьте подключение к интернету.';
-            } else {
-                errorMessage = error.message;
-            }
-            
-            UIUtils.showMessage(errorMessage, 'error');
+            UIUtils.showMessage(error.message, 'error');
         }
     }
 
@@ -125,8 +105,7 @@ class HotelBookingApp {
 
     updateUIForUserRole() {
         const isAdmin = AuthManager.isAdmin();
-        
-        // Показываем/скрываем кнопки в зависимости от роли
+    
         const addHotelBtn = document.getElementById('add-hotel-btn');
         const addRoomBtn = document.getElementById('add-room-btn');
         const addGuestBtn = document.getElementById('add-guest-btn');
@@ -137,7 +116,6 @@ class HotelBookingApp {
         if (addGuestBtn) addGuestBtn.style.display = isAdmin ? 'block' : 'none';
         if (addBookingBtn) addBookingBtn.style.display = AuthManager.isAuthenticated() ? 'block' : 'none';
         
-        // Обновляем навигацию
         const guestsTab = document.querySelector('[data-tab="guests"]');
         const hotelsTab = document.querySelector('[data-tab="hotels"]');
         const roomsTab = document.querySelector('[data-tab="rooms"]');
@@ -157,66 +135,35 @@ class HotelBookingApp {
     async loadInitialData() {
         if (!AuthManager.isAuthenticated()) return;
         
-        console.log('🚀 Starting initial data load...');
-        
         try {
-            // Используем фиксированных пользователей
-            this.users = AuthManager.getFixedUsers();
-            console.log(`✅ Using ${this.users.length} fixed users`);
+            await this.loadUsersWithRetry();
             
-            // Загружаем остальные данные с API
             await Promise.all([
                 this.loadHotels(),
-                this.loadRooms(), 
+                this.loadRooms(),
                 this.loadBookings()
             ]);
             
-            console.log('✅ All data loaded successfully');
         } catch (error) {
-            console.error('❌ Error loading data:', error);
             UIUtils.showMessage('Ошибка загрузки данных: ' + error.message, 'error');
         }
     }
 
     async loadUsersWithRetry() {
         try {
-            console.log('👥 Loading users from API...');
             this.users = await ApiClient.get('/users/');
-            this.usersLoadAttempted = true;
-            console.log(`✅ Loaded ${this.users.length} users from API`);
             this.renderGuests();
         } catch (error) {
-            console.error('❌ Failed to load users from API:', error);
-            this.usersLoadAttempted = true;
-            
-            // Пробуем альтернативный эндпоинт
-            try {
-                console.log('🔄 Retrying with alternative endpoint /users...');
-                this.users = await ApiClient.get('/users');
-                console.log(`✅ Loaded ${this.users.length} users from alternative endpoint`);
-                this.renderGuests();
-            } catch (retryError) {
-                console.error('❌ Alternative endpoint also failed:', retryError);
-                
-                // Создаем fallback список пользователей
-                this.createFallbackUsers();
-                this.renderGuests();
-                
-                throw new Error('Не удалось загрузить пользователей с сервера');
-            }
+            this.createFallbackUsers();
+            this.renderGuests();
         }
     }
 
     createFallbackUsers() {
-        console.log('🔄 Creating fallback users list...');
-        
-        // Fallback пользователи на основе текущего пользователя
         const currentUser = this.currentUser;
         if (currentUser) {
             this.users = [currentUser];
-            console.log(`✅ Created fallback with current user: ${currentUser.email}`);
         } else {
-            // Если нет текущего пользователя, создаем базовый список
             this.users = [
                 {
                     id: 1,
@@ -228,63 +175,45 @@ class HotelBookingApp {
                     created_at: new Date().toISOString()
                 }
             ];
-            console.log(`✅ Created basic fallback users list`);
         }
     }
 
     async loadHotels() {
         try {
-            console.log('🏨 Loading hotels...');
             this.hotels = await ApiClient.get('/hotels/');
-            console.log(`✅ Loaded ${this.hotels.length} hotels`);
             this.renderHotels();
         } catch (error) {
-            console.error('❌ Error loading hotels:', error);
-            // throw error;
         }
     }
 
     async loadRooms() {
         try {
-            console.log('🛏️ Loading rooms...');
             this.rooms = await ApiClient.get('/rooms/');
-            console.log(`✅ Loaded ${this.rooms.length} rooms`);
             this.renderRooms();
         } catch (error) {
-            console.error('❌ Error loading rooms:', error);
-            // throw error;
         }
     }
 
     async loadBookings() {
         try {
-            console.log('📅 Loading bookings...');
             const isAdmin = AuthManager.isAdmin();
             const currentUserId = this.currentUser?.id;
             
             if (isAdmin) {
-                // Администраторы видят все бронирования
                 this.bookings = await ApiClient.get('/bookings/');
             } else {
-                // Пользователи видят только свои бронирования
                 this.bookings = await ApiClient.get(`/bookings/user/${currentUserId}/bookings`);
             }
-            console.log(`✅ Loaded ${this.bookings.length} bookings`);
             this.renderBookings();
         } catch (error) {
-            console.error('❌ Error loading bookings:', error);
-            // throw error;
         }
     }
 
     async loadUsers() {
         try {
-            console.log('👥 Loading users (direct call)...');
             this.users = await ApiClient.get('/users/');
-            console.log(`✅ Loaded ${this.users.length} users`);
             this.renderGuests();
         } catch (error) {
-            console.error('❌ Error loading users:', error);
             this.renderGuestsError(error);
         }
     }
@@ -296,7 +225,6 @@ class HotelBookingApp {
         const isAdmin = AuthManager.isAdmin();
         
         if (!isAdmin) {
-            // Для обычных пользователей показываем только их профиль
             const currentUser = this.currentUser;
             if (currentUser) {
                 container.innerHTML = `
@@ -305,7 +233,7 @@ class HotelBookingApp {
                         <p><strong>📧 Email:</strong> ${currentUser.email}</p>
                         <p><strong>📞 Телефон:</strong> ${currentUser.phone || 'Не указан'}</p>
                         <p><strong>🎯 Роль:</strong> ${currentUser.role === 'admin' ? 'Администратор' : 'Пользователь'}</p>
-                        <p class="error-message">⚠️ Не удалось загрузить полный список пользователей: ${error.message}</p>
+                        <p class="error-message">⚠️ Не удалось загрузить полный список пользователей</p>
                         <div class="card-actions">
                             <button class="btn btn-warning" onclick="app.editGuest(${currentUser.id})">✏️ Редактировать профиль</button>
                             <button class="btn" onclick="app.showGuestBookings(${currentUser.id})">📋 Мои бронирования</button>
@@ -314,21 +242,13 @@ class HotelBookingApp {
                 `;
             }
         } else {
-            // Для администраторов показываем ошибку
             container.innerHTML = `
                 <div class="card error-card">
                     <h3>⚠️ Ошибка загрузки пользователей</h3>
                     <p>Не удалось загрузить список пользователей.</p>
                     <p><strong>Ошибка:</strong> ${error.message}</p>
-                    <p>Возможные причины:</p>
-                    <ul>
-                        <li>Проблемы с подключением к серверу</li>
-                        <li>Недостаточно прав для просмотра пользователей</li>
-                        <li>Ошибка валидации на сервере</li>
-                    </ul>
                     <div class="card-actions">
                         <button class="btn btn-primary" onclick="app.loadUsers()">🔄 Повторить попытку</button>
-                        <button class="btn" onclick="app.createFallbackUsers()">🛠️ Использовать резервный список</button>
                     </div>
                 </div>
             `;
@@ -341,17 +261,14 @@ class HotelBookingApp {
             return;
         }
 
-        // Скрыть все табы
         document.querySelectorAll('.tab-content').forEach(tab => {
             tab.classList.remove('active');
         });
         
-        // Убрать активный класс со всех кнопок
         document.querySelectorAll('.nav-link').forEach(link => {
             link.classList.remove('active');
         });
         
-        // Показать выбранный таб
         const tabElement = document.getElementById(`${tabName}-tab`);
         if (tabElement) {
             tabElement.classList.add('active');
@@ -364,7 +281,6 @@ class HotelBookingApp {
         
         this.currentTab = tabName;
         
-        // Обновить данные если нужно
         if (tabName === 'guests') {
             this.renderGuests();
         }
@@ -513,7 +429,6 @@ class HotelBookingApp {
         const currentUserId = this.currentUser?.id;
 
         container.innerHTML = this.users.map(user => {
-            // Пользователи видят только себя, админы видят всех
             if (!isAdmin && user.id !== currentUserId) {
                 return '';
             }
@@ -580,7 +495,6 @@ class HotelBookingApp {
         return statusMap[status] || status;
     }
 
-    // Методы для работы с отелями
     showHotelForm(hotel = null) {
         if (!AuthManager.isAdmin()) {
             UIUtils.showMessage('Недостаточно прав для управления отелями', 'error');
@@ -669,13 +583,11 @@ class HotelBookingApp {
         }
     }
 
-    // Методы для работы с гостями
     showGuestForm(user = null) {
         const isEdit = !!user;
         const isAdmin = AuthManager.isAdmin();
         const currentUserId = this.currentUser?.id;
 
-        // Проверяем права: пользователи могут редактировать только свой профиль
         if (!isAdmin && user && user.id !== currentUserId) {
             UIUtils.showMessage('Недостаточно прав для редактирования этого профиля', 'error');
             return;
@@ -729,7 +641,6 @@ class HotelBookingApp {
             const formData = FormUtils.getFormData('guest-form');
             const isAdmin = AuthManager.isAdmin();
             
-            // Пользователи не могут менять свою роль
             if (!isAdmin && formData.role) {
                 delete formData.role;
             }
@@ -738,7 +649,6 @@ class HotelBookingApp {
                 await ApiClient.put(`/users/${userId}`, formData);
                 UIUtils.showMessage('✅ Профиль успешно обновлен');
                 
-                // Если пользователь обновил свой профиль, обновляем данные
                 if (userId === this.currentUser?.id) {
                     const updatedUser = await ApiClient.get(`/users/${userId}`);
                     AuthManager.setCurrentUser(updatedUser);
@@ -770,7 +680,6 @@ class HotelBookingApp {
                 await ApiClient.delete(`/users/${userId}`);
                 UIUtils.showMessage('✅ Пользователь успешно удален');
                 
-                // Если пользователь удалил свой аккаунт, выходим
                 if (userId === this.currentUser?.id) {
                     this.logout();
                 } else {
@@ -819,7 +728,6 @@ class HotelBookingApp {
         showModal(`📋 ${isOwnProfile ? 'Мои бронирования' : `Бронирования гостя ${user.first_name} ${user.last_name}`}`, content);
     }
 
-    // Методы для работы с комнатами
     async editRoom(roomId) {
         if (!AuthManager.isAdmin()) {
             UIUtils.showMessage('Недостаточно прав для редактирования комнат', 'error');
@@ -876,7 +784,6 @@ class HotelBookingApp {
         showModal('🔄 Изменить статус комнаты', content);
     }
 
-    // Методы для работы с бронированиями
     async checkInBooking(bookingId) {
         if (!AuthManager.isAdmin()) {
             UIUtils.showMessage('Недостаточно прав для регистрации заезда', 'error');
@@ -945,7 +852,6 @@ class HotelBookingApp {
     }
 }
 
-// Глобальные функции
 function showModal(title, content) {
     document.getElementById('modal-title').textContent = title;
     document.getElementById('modal-content').innerHTML = content;
@@ -971,7 +877,7 @@ function showRegisterForm() {
             </div>
             <div class="form-group">
                 <label>Email:</label>
-                <input type="email" name="email" required>
+                    <input type="email" name="email" required>
             </div>
             <div class="form-group">
                 <label>Телефон:</label>
@@ -1007,7 +913,6 @@ document.addEventListener('DOMContentLoaded', () => {
     window.app = app;
 });
 
-// Глобальные функции для кнопок
 window.showHotelForm = () => app?.showHotelForm();
 window.showGuestForm = () => app?.showGuestForm();
 window.showRoomForm = () => {

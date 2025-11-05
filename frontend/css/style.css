@@ -188,7 +188,6 @@ body {
     flex: 1;
 }
 
-/* Модальные окна */
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -319,7 +318,6 @@ body {
     }
 }
 
-/* Стили для авторизации */
 .nav-auth {
     display: flex;
     align-items: center;
@@ -393,7 +391,6 @@ body {
     color: #666;
 }
 
-/* Адаптивность для навигации */
 @media (max-width: 768px) {
     .navbar {
         flex-wrap: wrap;
@@ -411,7 +408,6 @@ body {
     }
 }
 
-/* Добавьте в style.css */
 .nav-auth {
     display: flex;
     align-items: center;
