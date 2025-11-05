@@ -6,10 +6,15 @@ const API_BASE_URL = getApiBaseUrl();
 
 class ApiClient {
     static async request(endpoint, options = {}) {
+        const token = localStorage.getItem('access_token');
         const headers = {
             'Content-Type': 'application/json',
             ...options.headers
         };
+        
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
 
         const config = {
             ...options,
@@ -18,16 +23,16 @@ class ApiClient {
 
         let url = `${API_BASE_URL}${endpoint}`;
         
-        const currentUser = AuthManager.getCurrentUser();
-        if (currentUser && currentUser.id) {
-            const separator = url.includes('?') ? '&' : '?';
-            url += `${separator}user_id=${currentUser.id}`;
-        }
-
         try {
             const response = await fetch(url, config);
             
             if (!response.ok) {
+                if (response.status === 401) {
+                    localStorage.removeItem('access_token');
+                    localStorage.removeItem(this.CURRENT_USER_KEY);
+                    throw new Error('Сессия истекла. Пожалуйста, войдите снова.');
+                }
+                
                 let errorDetail = '';
                 
                 try {
@@ -123,23 +128,26 @@ class AuthManager {
 
     static async login(email, password) {
         try {
-            const url = `${API_BASE_URL}/users/`;
-            const response = await fetch(url);
+            const response = await fetch(`${API_BASE_URL}/users/login`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email, password })
+            });
             
             if (!response.ok) {
-                throw new Error(`HTTP ${response.status}`);
+                const errorData = await response.json();
+                throw new Error(errorData.detail || 'Ошибка при входе в систему');
             }
             
-            const users = await response.json();
-            const user = users.find(u => u.email === email);
+            const tokenData = await response.json();
+            const user = tokenData.user;
             
-            if (user) {
-                this.setCurrentUser(user);
-                return user;
-            } else {
-                throw new Error('Пользователь с таким email не найден');
-            }
+            localStorage.setItem('access_token', tokenData.access_token);
+            this.setCurrentUser(user);
             
+            return user;
         } catch (error) {
             throw new Error('Ошибка при входе в систему: ' + error.message);
         }

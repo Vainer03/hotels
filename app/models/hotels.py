@@ -63,6 +63,7 @@ class User(Base):
     last_name = Column(String(50), nullable=False)
     phone = Column(String(20), nullable=True)
     role = Column(Enum(UserRole), default=UserRole.USER)
+    hashed_password = Column(String(255), nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
     
     bookings = relationship(

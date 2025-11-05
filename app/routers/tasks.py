@@ -9,6 +9,7 @@ from app.tasks.analytics_tasks import analyze_booking_trends
 from app.core.celery import celery_app
 import app.schemas.schemas as schemas
 from app.core.enums import UserRole
+from app.core.security import get_password_hash 
 
 router = APIRouter(prefix="/tasks", tags=["tasks"])
 
@@ -20,6 +21,7 @@ async def init_mock_data():
         from app.models.hotels import Hotel, Room, User, Booking
         from app.database import Base
         from datetime import datetime, timedelta
+        from app.core.security import get_password_hash 
         
         Base.metadata.create_all(bind=engine)
         
@@ -139,105 +141,128 @@ async def init_mock_data():
                     "first_name": "Алексей", 
                     "last_name": "Администраторов", 
                     "phone": "+79990000001",
-                    "role": UserRole.ADMIN
+                    "role": UserRole.ADMIN,
+                    "password": "admin123" 
                 },
                 {
                     "email": "manager@hotels.com", 
                     "first_name": "Мария", 
                     "last_name": "Менеджерова", 
                     "phone": "+79990000002",
-                    "role": UserRole.ADMIN
+                    "role": UserRole.ADMIN,
+                    "password": "manager123"  
                 },
-                
                 {
                     "email": "ivan.petrov@example.com", 
                     "first_name": "Иван", 
                     "last_name": "Петров", 
                     "phone": "+79991234567",
-                    "role": UserRole.USER
+                    "role": UserRole.USER,
+                    "password": "password123" 
                 },
                 {
                     "email": "maria.ivanova@example.com", 
                     "first_name": "Мария", 
                     "last_name": "Иванова", 
                     "phone": "+79992345678",
-                    "role": UserRole.USER
+                    "role": UserRole.USER,
+                    "password": "password123"
                 },
                 {
                     "email": "alex.smirnov@example.com", 
                     "first_name": "Алексей", 
                     "last_name": "Смирнов", 
                     "phone": "+79993456789",
-                    "role": UserRole.USER
+                    "role": UserRole.USER,
+                    "password": "password123"
                 },
                 {
                     "email": "olga.sidorova@example.com", 
                     "first_name": "Ольга", 
                     "last_name": "Сидорова", 
                     "phone": "+79994567890",
-                    "role": UserRole.USER
+                    "role": UserRole.USER,
+                    "password": "password123"
                 },
                 {
                     "email": "dmitry.kuznetsov@example.com", 
                     "first_name": "Дмитрий", 
                     "last_name": "Кузнецов", 
                     "phone": "+79995678901",
-                    "role": UserRole.USER
+                    "role": UserRole.USER,
+                    "password": "password123"
                 },
                 {
                     "email": "ekaterina.popova@example.com", 
                     "first_name": "Екатерина", 
                     "last_name": "Попова", 
                     "phone": "+79996789012",
-                    "role": UserRole.USER
+                    "role": UserRole.USER,
+                    "password": "password123"
                 },
                 {
                     "email": "sergey.volkov@example.com", 
                     "first_name": "Сергей", 
                     "last_name": "Волков", 
                     "phone": "+79997890123",
-                    "role": UserRole.USER
+                    "role": UserRole.USER,
+                    "password": "password123"
                 },
                 {
                     "email": "natalia.fedorova@example.com", 
                     "first_name": "Наталия", 
                     "last_name": "Федорова", 
                     "phone": "+79998901234",
-                    "role": UserRole.USER
+                    "role": UserRole.USER,
+                    "password": "password123"
                 },
                 {
                     "email": "andrey.morozov@example.com", 
                     "first_name": "Андрей", 
                     "last_name": "Морозов", 
                     "phone": "+79999012345",
-                    "role": UserRole.USER
+                    "role": UserRole.USER,
+                    "password": "password123"
                 },
                 {
                     "email": "tatyana.nikitina@example.com", 
                     "first_name": "Татьяна", 
                     "last_name": "Никитина", 
                     "phone": "+79990123456",
-                    "role": UserRole.USER
+                    "role": UserRole.USER,
+                    "password": "password123"
                 },
                 {
                     "email": "business.traveler@example.com", 
                     "first_name": "Артем", 
                     "last_name": "Деловой", 
                     "phone": "+79991112233",
-                    "role": UserRole.USER
+                    "role": UserRole.USER,
+                    "password": "password123"
                 },
                 {
                     "email": "family.vacation@example.com", 
                     "first_name": "Светлана", 
                     "last_name": "Семейная", 
                     "phone": "+79992223344",
-                    "role": UserRole.USER
+                    "role": UserRole.USER,
+                    "password": "password123"
                 }
             ]
             
             users = []
             for user_data in users_data:
-                user = User(**user_data)
+                password = user_data.pop('password')
+                hashed_password = get_password_hash(password)
+                
+                user = User(
+                    email=user_data["email"],
+                    first_name=user_data["first_name"],
+                    last_name=user_data["last_name"],
+                    phone=user_data["phone"],
+                    role=user_data["role"],
+                    hashed_password=hashed_password 
+                )
                 db.add(user)
                 users.append(user)
 
@@ -266,7 +291,6 @@ async def init_mock_data():
                     "status": "confirmed",
                     "special_requests": "Отмечаем годовщину свадьбы"
                 },
-                
                 {
                     "user_id": users[3].id, 
                     "room_id": rooms[5].id, 
@@ -289,7 +313,6 @@ async def init_mock_data():
                     "status": "confirmed",
                     "special_requests": "Хочу номер с видом на море"
                 },
-                
                 {
                     "user_id": users[3].id, 
                     "room_id": rooms[8].id,  
@@ -312,7 +335,6 @@ async def init_mock_data():
                     "status": "completed",
                     "special_requests": "С детской кроваткой"
                 },
-                
                 {
                     "user_id": users[6].id, 
                     "room_id": rooms[20].id,
@@ -324,7 +346,6 @@ async def init_mock_data():
                     "status": "cancelled",
                     "special_requests": None
                 },
-
                 {
                     "user_id": users[0].id,  
                     "room_id": rooms[25].id,
@@ -347,7 +368,6 @@ async def init_mock_data():
                     "status": "confirmed",
                     "special_requests": "Проверка качества обслуживания"
                 },
-                
                 {
                     "user_id": users[7].id, 
                     "room_id": rooms[35].id,

@@ -5,10 +5,28 @@ import app.models.hotels as models
 import app.schemas.schemas as schemas
 from app.database import get_db
 from app.services.cache_service import CacheService
-from app.core.dependencies import get_current_user, require_admin, require_user, require_user_or_admin
+from app.core.dependencies import get_current_user_jwt as get_current_user, require_admin_jwt as require_admin, require_user_jwt as require_user, require_user_or_admin_jwt as require_user_or_admin
 from app.core.enums import UserRole
+from app.core.security import get_password_hash, verify_password, create_access_token
+from datetime import timedelta
+from app.config import settings
 
 router = APIRouter(prefix="/users", tags=["users"])
+
+@router.get("/debug/users")
+async def debug_users(db: Session = Depends(get_db)):
+    """Отладочный endpoint для проверки пользователей"""
+    users = db.query(models.User).all()
+    result = []
+    for user in users:
+        result.append({
+            "id": user.id,
+            "email": user.email,
+            "first_name": user.first_name,
+            "hashed_password": user.hashed_password if hasattr(user, 'hashed_password') else "NO_PASSWORD_FIELD",
+            "password_length": len(user.hashed_password) if hasattr(user, 'hashed_password') and user.hashed_password else 0
+        })
+    return result
 
 @router.post("/", response_model=schemas.UserRead)
 async def create_user(
@@ -27,8 +45,10 @@ async def create_user(
             status_code=403,
             detail="Недостаточно прав для создания администратора"
         )
-    
-    db_user = models.User(**user.model_dump())
+    user_data = user.model_dump()
+    hashed_password = get_password_hash(user_data.pop('password'))
+
+    db_user = models.User(**user_data, hashed_password=hashed_password)
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
@@ -45,20 +65,56 @@ async def register_user(user: schemas.UserCreate, db: Session = Depends(get_db))
         )
     
     user_data = user.model_dump()
+    hashed_password = get_password_hash(user_data.pop('password'))
     user_data['role'] = UserRole.USER
     
-    db_user = models.User(**user_data)
+    db_user = models.User(**user_data, hashed_password=hashed_password)
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
     return db_user
+
+@router.post("/login", response_model=schemas.Token)
+async def login(user_data: schemas.UserLogin, db: Session = Depends(get_db)):
+    """Аутентификация пользователя"""
+    user = db.query(models.User).filter(models.User.email == user_data.email).first()
+    if not user:
+        raise HTTPException(
+            status_code=401,
+            detail="Неверный email или пароль",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    if not hasattr(user, 'hashed_password') or not user.hashed_password:
+        raise HTTPException(
+            status_code=401,
+            detail="Пользователь создан без пароля. Пересоздайте данные через /api/v1/tasks/init-mock-data",
+        )
+    
+    if not verify_password(user_data.password, user.hashed_password):
+        raise HTTPException(
+            status_code=401,
+            detail="Неверный email или пароль",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        data={"sub": user.email, "user_id": user.id}, 
+        expires_delta=access_token_expires
+    )
+    
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "user": user
+    }
 
 @router.get("/", response_model=List[schemas.UserRead])
 async def get_users(
     skip: int = 0,
     limit: int = 100,
     db: Session = Depends(get_db),
-    # current_user: models.User = Depends(require_admin)
 ):
     """Получить список всех пользователей"""
     return db.query(models.User).offset(skip).limit(limit).all()
@@ -121,6 +177,10 @@ async def update_user(
             )
     
     update_data = user_update.model_dump(exclude_unset=True)
+    
+    if 'password' in update_data and update_data['password']:
+        update_data['hashed_password'] = get_password_hash(update_data.pop('password'))
+    
     for field, value in update_data.items():
         setattr(user, field, value)
     
@@ -136,7 +196,7 @@ async def update_user(
 async def delete_user(
     user_id: int, 
     db: Session = Depends(get_db),
-    current_user: models.User = Depends(require_admin)  # Только админ может удалять пользователей
+    current_user: models.User = Depends(require_admin) 
 ):
     """Удалить пользователя (только для администраторов)"""
     user = db.query(models.User).filter(models.User.id == user_id).first()

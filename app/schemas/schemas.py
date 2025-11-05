@@ -87,6 +87,15 @@ class RoomRead(RoomBase):
     
     model_config = ConfigDict(from_attributes=True)
 
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: str
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+    user: 'UserRead'
+
 class UserBase(BaseModel):
     email: str
     first_name: str
@@ -95,7 +104,13 @@ class UserBase(BaseModel):
     role: UserRole = UserRole.USER
 
 class UserCreate(UserBase):
-    pass
+    password: str
+
+    @field_validator('password')
+    def validate_password(cls, v):
+        if len(v) < 6:
+            raise ValueError('Пароль должен содержать минимум 6 символов')
+        return v
 
 class UserUpdate(BaseModel):
     email: Optional[str] = None
@@ -103,6 +118,13 @@ class UserUpdate(BaseModel):
     last_name: Optional[str] = None
     phone: Optional[str] = None
     role: Optional[UserRole] = None
+    password: Optional[str] = None
+
+    @field_validator('password')
+    def validate_password(cls, v):
+        if v is not None and len(v) < 6:
+            raise ValueError('Пароль должен содержать минимум 6 символов')
+        return v
 
 class UserRead(UserBase):
     id: int
@@ -158,3 +180,5 @@ class AvailabilitySearch(BaseModel):
     guests: Optional[int] = None
     min_price: Optional[float] = None
     max_price: Optional[float] = None
+
+Token.model_rebuild()
