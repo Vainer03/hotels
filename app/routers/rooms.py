@@ -7,6 +7,7 @@ import app.schemas.schemas as schemas
 import app.core.enums as enums
 from app.database import get_db
 from app.services.cache_service import CacheService
+from app.core.dependencies import require_admin
 
 router = APIRouter(prefix="/rooms", tags=["rooms"])
 
@@ -188,7 +189,10 @@ async def get_room(room_id: int, db: Session = Depends(get_db)):
     return room
 
 @router.post("/", response_model=schemas.RoomRead)
-async def create_room(room: schemas.RoomCreate, db: Session = Depends(get_db)):
+async def create_room(
+    room: schemas.RoomCreate, 
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(require_admin)):
     """Создать новую комнату"""
     hotel = db.query(models.Hotel).filter(models.Hotel.id == room.hotel_id).first()
     if not hotel:
@@ -219,7 +223,8 @@ async def create_room(room: schemas.RoomCreate, db: Session = Depends(get_db)):
 async def update_room(
     room_id: int,
     room_update: schemas.RoomUpdate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(require_admin)
 ):
     """Обновить информацию о комнате"""
     room = db.query(models.Room).filter(models.Room.id == room_id).first()
@@ -253,7 +258,8 @@ async def update_room(
 async def update_room_status(
     room_id: int,
     status: str,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(require_admin)
 ):
     """Обновить статус комнаты"""
     room = db.query(models.Room).filter(models.Room.id == room_id).first()
@@ -274,7 +280,10 @@ async def update_room_status(
 
 
 @router.delete("/{room_id}", response_model=schemas.MessageResponse)
-def delete_room(room_id: int, db: Session = Depends(get_db)):
+def delete_room(
+    room_id: int, 
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(require_admin)):
     """Удалить комнату с обработкой активных бронирований"""
     try:
         db_room = db.query(models.Room).filter(models.Room.id == room_id).first()

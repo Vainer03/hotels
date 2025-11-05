@@ -5,97 +5,178 @@ const getApiBaseUrl = () => {
 const API_BASE_URL = getApiBaseUrl();
 
 console.log(`API Base URL: ${API_BASE_URL}`);
-console.log(`Current host: ${window.location.hostname}`);
+
 class ApiClient {
-    static async get(endpoint) {
+    static async request(endpoint, options = {}) {
+        const headers = {
+            'Content-Type': 'application/json',
+            ...options.headers
+        };
+
+        const config = {
+            ...options,
+            headers
+        };
+
+        let url = `${API_BASE_URL}${endpoint}`;
+        
+        // Добавляем user_id для всех запросов, которые его требуют
+        const currentUser = AuthManager.getCurrentUser();
+        if (currentUser) {
+            // Определяем эндпоинты, которые требуют user_id
+            const endpointsRequiringUserId = ['/users/', '/users', '/bookings/', '/bookings'];
+            const requiresUserId = endpointsRequiringUserId.some(ep => endpoint.includes(ep));
+            
+            if (requiresUserId) {
+                const separator = url.includes('?') ? '&' : '?';
+                url += `${separator}user_id=${currentUser.id}`;
+            }
+        }
+
         try {
-            console.log(`GET ${endpoint}`);
-            const response = await fetch(`${API_BASE_URL}${endpoint}`);
+            const response = await fetch(url, config);
             
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                let errorDetail = '';
+                
+                try {
+                    const responseText = await response.text();
+                    
+                    if (responseText) {
+                        try {
+                            const errorData = JSON.parse(responseText);
+                            
+                            if (Array.isArray(errorData)) {
+                                errorDetail = errorData.map(err => {
+                                    if (err.loc && err.msg) {
+                                        return `${err.loc.join('.')}: ${err.msg}`;
+                                    }
+                                    return JSON.stringify(err);
+                                }).join('; ');
+                            } else if (errorData.detail) {
+                                if (Array.isArray(errorData.detail)) {
+                                    errorDetail = errorData.detail.map(d => 
+                                        `${d.loc?.join('.') || 'field'}: ${d.msg || JSON.stringify(d)}`
+                                    ).join('; ');
+                                } else {
+                                    errorDetail = String(errorData.detail);
+                                }
+                            } else {
+                                errorDetail = JSON.stringify(errorData);
+                            }
+                        } catch (jsonError) {
+                            errorDetail = responseText;
+                        }
+                    }
+                } catch (textError) {
+                    errorDetail = 'Could not read response body';
+                }
+                
+                throw new Error(`HTTP ${response.status}: ${errorDetail}`);
             }
             
-            const data = await response.json();
-            console.log(`GET ${endpoint} response:`, data);
-            return data;
-        } catch (error) {
-            console.error(`GET Error ${endpoint}:`, error);
-            throw error;
-        }
-    }
-
-    static async post(endpoint, data) {
-        try {
-            console.log(`POST ${endpoint}:`, data);
-            const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(data)
-            });
-            
-            const responseData = await response.json();
-            
-            if (!response.ok) {
-                throw new Error(responseData.detail || `HTTP error! status: ${response.status}`);
-            }
-            
-            console.log(`POST ${endpoint} response:`, responseData);
-            return responseData;
-        } catch (error) {
-            console.error(`POST Error ${endpoint}:`, error);
-            throw error;
-        }
-    }
-
-    static async put(endpoint, data) {
-        try {
-            console.log(`PUT ${endpoint}:`, data);
-            const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(data)
-            });
-            
-            const responseData = await response.json();
-            
-            if (!response.ok) {
-                throw new Error(responseData.detail || `HTTP error! status: ${response.status}`);
-            }
-            
-            console.log(`PUT ${endpoint} response:`, responseData);
-            return responseData;
-        } catch (error) {
-            console.error(`PUT Error ${endpoint}:`, error);
-            throw error;
-        }
-    }
-
-    static async delete(endpoint) {
-        try {
-            console.log(`DELETE ${endpoint}`);
-            const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-                method: 'DELETE'
-            });
-            
-            if (response.status === 204) { // No Content
+            if (response.status === 204) {
                 return { message: 'Deleted successfully' };
             }
             
-            const data = await response.json();
+            const responseText = await response.text();
+            if (!responseText) return {};
             
-            if (!response.ok) {
-                throw new Error(data.detail || `HTTP error! status: ${response.status}`);
+            return JSON.parse(responseText);
+            
+        } catch (error) {
+            console.error(`API Request Failed for ${url}:`, error);
+            throw error;
+        }
+    }
+
+    static async get(endpoint) {
+        return this.request(endpoint);
+    }
+
+    static async post(endpoint, data) {
+        return this.request(endpoint, {
+            method: 'POST',
+            body: JSON.stringify(data)
+        });
+    }
+
+    static async put(endpoint, data) {
+        return this.request(endpoint, {
+            method: 'PUT',
+            body: JSON.stringify(data)
+        });
+    }
+
+    static async delete(endpoint) {
+        return this.request(endpoint, {
+            method: 'DELETE'
+        });
+    }
+}
+
+class AuthManager {
+    static CURRENT_USER_KEY = 'current_user';
+
+    static setCurrentUser(user) {
+        localStorage.setItem(this.CURRENT_USER_KEY, JSON.stringify(user));
+    }
+
+    static getCurrentUser() {
+        const userStr = localStorage.getItem(this.CURRENT_USER_KEY);
+        return userStr ? JSON.parse(userStr) : null;
+    }
+
+    static isAdmin() {
+        const user = this.getCurrentUser();
+        return user && user.role === 'admin';
+    }
+
+    static isUser() {
+        const user = this.getCurrentUser();
+        return user && user.role === 'user';
+    }
+
+    static isAuthenticated() {
+        return !!this.getCurrentUser();
+    }
+
+    static logout() {
+        localStorage.removeItem(this.CURRENT_USER_KEY);
+        window.location.reload();
+    }
+
+    static async login(email, password) {
+        try {
+            // Загружаем пользователей через API
+            const users = await ApiClient.get('/users/');
+            const user = users.find(u => u.email === email);
+            
+            if (user) {
+                this.setCurrentUser(user);
+                return user;
+            } else {
+                throw new Error('Пользователь с таким email не найден');
             }
             
-            console.log(`DELETE ${endpoint} response:`, data);
-            return data;
         } catch (error) {
-            console.error(`DELETE Error ${endpoint}:`, error);
+            console.error('Login error:', error);
+            throw error;
+        }
+    }
+
+    static async register(userData) {
+        try {
+            const registrationData = {
+                ...userData,
+                role: 'user'
+            };
+            
+            const newUser = await ApiClient.post('/users/register', registrationData);
+            this.setCurrentUser(newUser);
+            return newUser;
+        } catch (error) {
+            console.error('Registration error:', error);
             throw error;
         }
     }

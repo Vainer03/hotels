@@ -7,6 +7,7 @@ import app.models.hotels as models
 import app.schemas.schemas as schemas
 from app.database import get_db
 from app.services.cache_service import CacheService
+from app.core.dependencies import require_admin, require_user_or_admin
 
 router = APIRouter(prefix="/hotels", tags=["hotels"])
 
@@ -89,7 +90,10 @@ async def get_hotel(hotel_id: int, db: Session = Depends(get_db)):
     return hotel_data
 
 @router.post("/", response_model=schemas.HotelRead)
-async def create_hotel(hotel: schemas.HotelCreate, db: Session = Depends(get_db)):
+async def create_hotel(
+    hotel: schemas.HotelCreate, 
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(require_admin)):
     """Создать новый отель"""
     print(f"Received hotel data: {hotel.model_dump()}")
     
@@ -113,7 +117,8 @@ async def create_hotel(hotel: schemas.HotelCreate, db: Session = Depends(get_db)
 async def update_hotel(
     hotel_id: int, 
     hotel_update: schemas.HotelUpdate, 
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(require_admin)
 ):
     """Обновить информацию об отеле"""
     db_hotel = db.query(models.Hotel).filter(models.Hotel.id == hotel_id).first()
@@ -133,7 +138,10 @@ async def update_hotel(
     return db_hotel
 
 @router.delete("/{hotel_id}", response_model=schemas.MessageResponse)
-async def delete_hotel(hotel_id: int, db: Session = Depends(get_db)):
+async def delete_hotel(
+    hotel_id: int, 
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(require_admin)):
     """Удалить отель и все связанные данные"""
     try:
         db_hotel = db.query(models.Hotel).filter(models.Hotel.id == hotel_id).first()

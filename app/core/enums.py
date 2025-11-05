@@ -13,3 +13,7 @@ class BookingStatus(str, enum.Enum):
     COMPLETED = "completed"
     CHECKED_IN = "checked_in"
     CHECKED_OUT = "checked_out"
+
+class UserRole(str, enum.Enum):
+    ADMIN = "admin"
+    USER = "user"

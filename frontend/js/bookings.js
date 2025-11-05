@@ -47,9 +47,18 @@ function getBookingStatusText(status) {
 }
 
 function showBookingForm() {
-    const usersOptions = app.users.map(user => 
-        `<option value="${user.id}">${user.first_name} ${user.last_name} (${user.email})</option>`
-    ).join('');
+    const isAdmin = AuthManager.isAdmin();
+    const currentUser = AuthManager.getCurrentUser();
+    
+    let usersOptions = '';
+    if (isAdmin) {
+        usersOptions = app.users.map(user => 
+            `<option value="${user.id}">${user.first_name} ${user.last_name} (${user.email})</option>`
+        ).join('');
+    } else {
+        // Обычные пользователи могут создавать бронирования только для себя
+        usersOptions = `<option value="${currentUser.id}" selected>${currentUser.first_name} ${currentUser.last_name} (${currentUser.email})</option>`;
+    }
     
     const hotelsOptions = app.hotels.map(hotel => 
         `<option value="${hotel.id}">${hotel.name} - ${hotel.city}</option>`
@@ -71,9 +80,9 @@ function showBookingForm() {
     
     const content = `
         <form id="booking-form">
-            <div class="form-group">
+            <div class="form-group" ${!isAdmin ? 'style="display: none;"' : ''}>
                 <label>Гость:</label>
-                <select name="user_id" required>
+                <select name="user_id" required ${!isAdmin ? 'disabled' : ''}>
                     <option value="">Выберите гостя</option>
                     ${usersOptions}
                 </select>
@@ -118,6 +127,13 @@ function showBookingForm() {
     `;
     
     showModal('Новое бронирование', content);
+    
+    // Если не админ, автоматически устанавливаем текущего пользователя
+    if (!isAdmin) {
+        setTimeout(() => {
+            document.querySelector('select[name="user_id"]').value = currentUser.id;
+        }, 100);
+    }
 }
 
 function updateAvailableRooms(hotelId) {

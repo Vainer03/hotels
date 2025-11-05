@@ -8,12 +8,23 @@ from app.database import get_db
 from app.services.booking_events import BookingEventService
 from app.services.notification_service import NotificationService
 from app.services.cache_service import CacheService
+from app.core.dependencies import get_current_user, require_admin, require_user_or_admin
 
 router = APIRouter(prefix="/bookings", tags=["bookings"])
 
 @router.post("/", response_model=schemas.BookingRead)
-async def create_booking(booking: schemas.BookingCreate, db: Session = Depends(get_db)):
+async def create_booking(
+    booking: schemas.BookingCreate, 
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(require_user_or_admin) 
+):
     """Создать новое бронирование"""
+    if current_user.role != models.UserRole.ADMIN and booking.user_id != current_user.id:
+        raise HTTPException(
+            status_code=403,
+            detail="Недостаточно прав для создания бронирования для другого пользователя"
+        )
+    
     user = db.query(models.User).filter(models.User.id == booking.user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="Пользователь не найден")
@@ -120,7 +131,8 @@ async def create_booking(booking: schemas.BookingCreate, db: Session = Depends(g
 async def get_bookings(
     skip: int = 0,
     limit: int = 100,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(require_admin),
 ):
     """Получить список всех бронирований"""
     bookings = db.query(models.Booking).offset(skip).limit(limit).all()
@@ -150,7 +162,11 @@ async def get_bookings(
     return result
 
 @router.get("/{booking_id}", response_model=schemas.BookingWithDetailsRead)
-async def get_booking(booking_id: int, db: Session = Depends(get_db)):
+async def get_booking(
+    booking_id: int, 
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(require_user_or_admin)
+    ):
     """Получить бронирование по ID с кэшированием"""
     cache_service = CacheService()
     
@@ -162,6 +178,10 @@ async def get_booking(booking_id: int, db: Session = Depends(get_db)):
     if not booking:
         raise HTTPException(status_code=404, detail="Бронирование не найдено")
     
+    if current_user.role != models.UserRole.ADMIN and booking.user_id != current_user.id:
+        raise HTTPException(status_code = 403,
+                            detail="Недостаточно прав для просмотра этого бронирования")
+
     booking_data = schemas.BookingWithDetailsRead.model_validate(booking)
     
     await cache_service.cache_booking_details(booking_id, booking_data.model_dump())
@@ -169,7 +189,11 @@ async def get_booking(booking_id: int, db: Session = Depends(get_db)):
     return booking_data
 
 @router.get("/user/{user_id}/bookings", response_model=List[schemas.BookingWithDetailsRead])
-async def get_user_bookings(user_id: int, db: Session = Depends(get_db)):
+async def get_user_bookings(
+    user_id: int, 
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(require_user_or_admin)
+    ):
     """Получить все бронирования пользователя с кэшированием"""
     cache_service = CacheService()
     
@@ -180,6 +204,12 @@ async def get_user_bookings(user_id: int, db: Session = Depends(get_db)):
     user = db.query(models.User).filter(models.User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="Пользователь не найден")
+
+    if current_user.role != models.UserRole.ADMIN and user_id != current_user.id:
+        raise HTTPException(
+            status_code=403,
+            detail="Недостаточно прав для просмотра бронирований другого пользователя"
+        )    
 
     bookings = db.query(models.Booking)\
         .filter(models.Booking.user_id == user_id)\
@@ -213,13 +243,20 @@ async def get_user_bookings(user_id: int, db: Session = Depends(get_db)):
 async def update_booking(
     booking_id: int,
     booking_update: schemas.BookingUpdate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(require_user_or_admin)
 ):
     """Обновить информацию о бронировании"""
     booking = db.query(models.Booking).filter(models.Booking.id == booking_id).first()
     if not booking:
         raise HTTPException(status_code=404, detail="Бронирование не найдено")
     
+    if current_user.role != models.UserRole.ADMIN and booking.user_id != current_user.id:
+        raise HTTPException(
+            status_code = 403,
+            detail="Недостаточно прав для обновления этого бронирования"
+        )
+
     if booking.status in [models.BookingStatus.CANCELLED, models.BookingStatus.COMPLETED]:
         raise HTTPException(
             status_code=400,
@@ -244,12 +281,21 @@ async def update_booking(
     return booking
 
 @router.put("/{booking_id}/cancel", response_model=schemas.MessageResponse)
-async def cancel_booking(booking_id: int, db: Session = Depends(get_db)):
+async def cancel_booking(
+    booking_id: int, 
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(require_user_or_admin)):
     """Отменить бронирование"""
     booking = db.query(models.Booking).filter(models.Booking.id == booking_id).first()
     if not booking:
         raise HTTPException(status_code=404, detail="Бронирование не найдено")
     
+    if current_user.role != models.UserRole.ADMIN and booking.user_id != current_user.id:
+        raise HTTPException(
+            status_code=403,
+            detail="Недостаточно прав для отмены этого бронирования"
+        )
+
     if booking.status == models.BookingStatus.CANCELLED:
         raise HTTPException(status_code=400, detail="Бронирование уже отменено")
     
